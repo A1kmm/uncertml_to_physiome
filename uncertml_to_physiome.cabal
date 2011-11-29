@@ -1,0 +1,10 @@
+Name: uncertmlToPhysiome
+Version: 0.0.1
+Cabal-Version: >= 1.2
+Description: Interconverter between UncertML and the uncertainty representations used in the physiome languages CellML and FieldML.
+Build-Type: Simple
+Executable uncertml2cellml
+  Main-Is: UncertML2CellML.hs
+  Build-Depends:
+    base >= 2,
+    HaXml >= 1.22
