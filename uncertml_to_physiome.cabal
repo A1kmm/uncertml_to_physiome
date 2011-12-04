@@ -7,4 +7,4 @@ Executable uncertml2cellml
   Main-Is: UncertML2CellML.hs
   Build-Depends:
     base >= 2,
-    HaXml >= 1.22
+    hxt >= 9.1
