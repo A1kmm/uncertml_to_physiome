@@ -42,7 +42,7 @@ data UncertMLDistribution =
   BetaDistribution { betaAlpha :: Double, betaBeta :: Double } |
   LaplaceDistribution { laplaceAlpha :: Double, laplaceBeta :: Double } |
   CauchyDistribution { cauchyLocation :: Double, cauchyScale :: Double } |
-  WeibullDistribution { weibullLocation :: Double, weibullScale :: Double } |
+  WeibullDistribution { weibullScale :: Double, weibullShape :: Double } |
   LogisticDistribution { logisticLocation :: Double, logisticScale :: Double } |
   ChiSquareDistribution { chiSqDegF :: Int } |
   GeometricDistribution { geoProbability :: Double } |
@@ -51,7 +51,7 @@ data UncertMLDistribution =
                                hypergeoPopSize :: Int } |
   FDistribution { fdistDenominator :: Double, fdistNumerator :: Double } |
   NegativeBinomialDistribution { negbinNumFailures :: Int, negbinProb :: Double } |
-  ParetoDistribution { paretoScale :: Double, paretoShape :: Double } |
+  ParetoDistribution { paretoScale :: Double, paretoSlope :: Double } |
   WishartDistribution { wishartDegF :: Double, wishartScale :: [[Double]] } |
   BernoulliDistribution { bernoulliProb :: Double } deriving(Eq, Ord, Show)
 
@@ -244,15 +244,36 @@ main = do
 doConversion :: String -> String
 doConversion = concat . runLA (xread >>> propagateNamespaces >>> (xshow this <+> constA "Out: " <+> (xmlToUncertMLDistribution >>^ show)))
 
+unIsDiscrete (GeometricDistribution {}) = True
+unIsDiscrete (HypergeometricDistribution {}) = True
+unIsDiscrete (NegativeBinomialDistribution {}) = True
+unIsDiscrete (BernoulliDistribution {}) = True
 unIsDiscrete (PoissonDistribution {}) = True
+unIsDiscrete (BinomialDistribution {}) = True
 unIsDiscrete _ = False
 
-unToMMLAST (AsSamples v) = M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromRealisations")
-                             [M2Vector (map (\r -> M2Vector (map (M2Cn "dimensionless") r)) v)]
+sampleOutput ([]:_) = M2Ci "outvar"
+sampleOutput ((a:[]):_) = M2Ci "outvar"
+sampleOutput (l:_) = M2Vector $ map (\i -> M2Ci ("outvar" ++ show i)) [1..length l]
+sampleOutput _ = M2Ci "outvar"
+
+unToMMLAST (AsSamples v) = [M2Apply M2Eq [
+                               sampleOutput v,
+                               M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromRealisations")
+                               [M2Vector (map (\r -> M2Vector (map (M2Cn "dimensionless") r)) v)]]]
 unToMMLAST (DirichletDistribution conc) = error "Multivariate dirichlet distrib generator - todo"
 
-unToMMLAST v | unIsDiscrete v = M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromMass") [M2Lambda "massBvar" $ unToMMLASTPMF (M2Ci "massBvar") v]
-unToMMLAST v = M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity") [M2Lambda "densityBvar" $ unToMMLASTPDF (M2Ci "densityBvar") v]
+unToMMLAST (NormalInverseGammaDistribution mean varScal shape scale) =
+  let
+    lambda = M2Cn "dimensionless" mean
+  in
+   error "Normal Inverse Gamma Distribution: To do"
+   
+unToMMLAST v | unIsDiscrete v =
+  [
+    M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromMass") [M2Lambda "massBvar" $ unToMMLASTPMF (M2Ci "massBvar") v]
+  ]
+             | otherwise = [M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity") [M2Lambda "densityBvar" $ unToMMLASTPDF (M2Ci "densityBvar") v]]
 
 unToMMLASTPDF x (ExponentialDistribution rate) =
   M2Piecewise [(M2Cn "dimensionless" 0, M2Apply M2Lt [x, (M2Cn "dimensionless" 0)])] $ Just $
@@ -279,7 +300,8 @@ unToMMLASTPDF x (InverseGammaDistribution shape scale) =
      M2Apply M2Exp [M2Apply M2Minus [M2Apply M2Divide [beta, x]]]
      ]
 
-unToMMLASTPDF x (NormalInverseGammaDistribution mean varScal shape scale) = error "Normal Inverse Gamma Distribution is not yet supported"
+unToMMLASTPDF x (NormalInverseGammaDistribution mean varScal shape scale) =
+  error "Normal Inverse Gamma Distribution is not yet supported"
 
 unToMMLASTPDF x (NormalDistribution mean var) =
   let
@@ -398,41 +420,161 @@ unToMMLASTPDF x (BetaDistribution alphaP betaP) =
         M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, x],
                          M2Apply M2Minus [beta, M2Cn "dimensionless" 1]]
         ],
-     M2Apply (M2Int { m2intDegree = Nothing, m2intLowlimit = Just (M2Cn "dimensionless" 0), m2intUplimit = Just (M2Cn "dimensionless" 1), m2intBvar = "betaBvar" }) [
-     let
-       u = M2Ci "betaBvar"
-     in
-      M2Apply M2Times [
-        M2Apply M2Power [u, M2Apply M2Minus [alpha, M2Cn "dimensionless" 1]],
-        M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, u], M2Apply M2Minus [beta, M2Cn "dimensionless" 1]]
-      ]]
+     mmlBetaFunc alpha beta
      ]
 
-unToMMLASTPDF x (LaplaceDistribution alpha beta) = undefined
+unToMMLASTPDF x (LaplaceDistribution locP scaleP) =
+  let
+    loc = M2Cn "dimensionless" locP
+    scale = M2Cn "dimensionless" scaleP
+  in
+    M2Apply M2Times
+      [
+        M2Apply M2Divide [M2Cn "dimensionless" 1,
+                          M2Apply M2Times [M2Cn "dimensionless" 2, scale]],
+        M2Apply M2Exp
+          [
+            M2Apply M2Minus
+              [
+                M2Apply M2Divide [ M2Apply M2Abs [ M2Apply M2Minus [x, loc] ], scale ]
+              ]
+          ]
+      ]
 
-unToMMLASTPDF x (CauchyDistribution loc scale) = undefined
+unToMMLASTPDF x (CauchyDistribution locP scaleP) =
+  let
+    loc = M2Cn "dimensionless" locP
+    scale = M2Cn "dimensionless" scaleP
+  in
+   M2Apply M2Divide
+     [
+       M2Cn "dimensionless" 1,
+       M2Apply M2Times
+         [
+           M2Pi,
+           scale,
+           M2Apply M2Plus
+             [
+               M2Cn "dimensionless" 1,
+               M2Apply M2Power
+                 [
+                   M2Apply M2Divide
+                     [
+                       M2Apply M2Minus [x, loc],
+                       scale
+                     ],
+                   M2Cn "dimensionless" 2
+                 ]
+             ]
+         ]
+     ]
 
-unToMMLASTPDF x (WeibullDistribution loc scale) = undefined
+unToMMLASTPDF x (WeibullDistribution scaleP shapeP) =
+  let
+    scale = M2Cn "dimensionless" scaleP
+    shape = M2Cn "dimensionless" shapeP
+  in
+   M2Apply M2Times
+     [
+       M2Apply M2Divide [shape, scale],
+       M2Apply M2Power [M2Apply M2Divide [x, scale], M2Apply M2Minus [shape, M2Cn "dimensionless" 1]],
+       M2Apply M2Exp [M2Apply M2Minus [M2Apply M2Power [M2Apply M2Divide [x, scale], shape]]]
+     ]
+    
+unToMMLASTPDF x (LogisticDistribution locP scaleP) =
+  let
+    loc = M2Cn "dimensionless" locP
+    scale = M2Cn "dimensionless" scaleP
+  in
+   M2Apply M2Divide
+     [
+       M2Apply M2Exp [M2Apply M2Divide [M2Apply M2Minus [M2Apply M2Minus [x, loc]], scale]],
+       M2Apply M2Times
+         [
+           scale,
+           M2Apply M2Power
+             [
+               M2Apply M2Plus
+                 [
+                   M2Cn "dimensionless" 1,
+                   M2Apply M2Exp [M2Apply M2Divide [M2Apply M2Minus [M2Apply M2Minus [x, loc]], scale]]
+                 ],
+               M2Cn "dimensionless" 2
+             ]
+         ]
+     ]
 
-unToMMLASTPDF x (LogisticDistribution loc scale) = undefined
+unToMMLASTPDF x (ChiSquareDistribution degfP) =
+  let
+    degf = M2Cn "dimensionless" (fromIntegral degfP)
+  in
+   M2Apply M2Times
+     [
+       M2Apply M2Divide
+         [
+           M2Cn "dimensionless" 1,
+           M2Apply M2Times
+             [
+               M2Apply M2Power [ M2Cn "dimensionless" 2, M2Apply M2Divide [degf, M2Cn "dimensionless" 2] ],
+               mmlGammaFunc (M2Apply M2Divide [degf, M2Cn "dimensionless" 2])
+             ]
+         ],
+       M2Apply M2Power
+         [
+           x, M2Apply M2Minus [M2Apply M2Divide [degf, M2Cn "dimensionless" 2], M2Cn "dimensionless" 1]
+         ],
+       M2Apply M2Exp
+         [
+           M2Apply M2Divide [M2Apply M2Minus [x], M2Cn "dimensionless" 2]
+         ]
+     ]
+   
+unToMMLASTPDF x (FDistribution denom num) =
+  let
+    d1 = M2Cn "dimensionless" num
+    d2 = M2Cn "dimensionless" denom
+  in
+    M2Apply M2Divide
+      [
+        M2Apply (M2Root Nothing)
+          [
+            M2Apply M2Divide
+              [
+                M2Apply M2Times [ M2Apply M2Power [M2Apply M2Times [d1, x], d1], M2Apply M2Power [d2, d2] ],
+                M2Apply M2Power [M2Apply M2Plus [M2Apply M2Times [d1, x], d2], M2Apply M2Plus [d1, d2]]
+              ]
+          ],
+        M2Apply M2Times
+          [
+            x, mmlBetaFunc (M2Apply M2Divide [d1, M2Cn "dimensionless" 2]) (M2Apply M2Divide [d2, M2Cn "dimensionless" 2])
+          ]
+      ]
 
-unToMMLASTPDF x (ChiSquareDistribution degf) = undefined
+unToMMLASTPDF x (ParetoDistribution scale slope) =
+  let
+    xm = M2Cn "dimensionless" scale
+    alpha = M2Cn "dimensionless" slope
+  in
+   M2Piecewise [
+     (M2Apply M2Divide
+      [
+        M2Apply M2Times [ alpha, M2Apply M2Power [xm, alpha] ],
+        M2Apply M2Power [ x, M2Apply M2Plus [ alpha, M2Cn "dimensionless" 1 ]]
+      ],
+      M2Apply M2Geq [x, xm])] (Just $ M2Cn "dimensionless" 0)
 
-unToMMLASTPDF x (GeometricDistribution prob) = undefined
-
-unToMMLASTPDF x (HypergeometricDistribution nsuccess ntrials npop) = undefined
-
-unToMMLASTPDF x (FDistribution denom num) = undefined
-
-unToMMLASTPDF x (NegativeBinomialDistribution numFailures prob) = undefined
-
-unToMMLASTPDF x (ParetoDistribution scale shape) = undefined
-
-unToMMLASTPDF x (WishartDistribution degf scales) = undefined
-
-unToMMLASTPDF x (BernoulliDistribution prob) = undefined
+unToMMLASTPDF x (WishartDistribution degf scales) = error "Wishart distribution is not yet supported"
 
 unToMMLASTPDF _ _ = error "PDF requested for unexpected UncertML distribution"
+
+unToMMLASTPMF k (BernoulliDistribution prob) =
+  let
+    p = M2Cn "dimensionless" prob
+  in
+   M2Piecewise
+     [(p, M2Apply M2Eq [k, M2Cn "dimensionless" 1]),
+      (M2Apply M2Minus [M2Cn "dimensionless" 1, p], M2Apply M2Eq [k, M2Cn "dimensionless" 1])]
+     (Just $ M2Cn "dimensionless" 0)
 
 unToMMLASTPMF k (PoissonDistribution poissonRate) =
   let
@@ -442,6 +584,36 @@ unToMMLASTPMF k (PoissonDistribution poissonRate) =
       M2Apply M2Divide [M2Apply M2Power [lambda, k], M2Apply M2Factorial [k]],
       M2Apply M2Exp [M2Apply M2Minus [lambda]]
                     ]
+
+unToMMLASTPMF k (GeometricDistribution prob) =
+  let
+    p = M2Cn "dimensionless" prob
+  in
+    M2Apply M2Times [M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, p], M2Apply M2Minus [k, M2Cn "dimensionless" 1]], p]
+
+unToMMLASTPMF k (HypergeometricDistribution nsuccess ntrials npop) =
+  let
+    m = M2Cn "dimensionless" (fromIntegral nsuccess)
+    bigN = M2Cn "dimensionless" (fromIntegral npop)
+    smalln = M2Cn "dimensionless" (fromIntegral ntrials)
+  in
+   M2Apply M2Divide
+     [
+       M2Apply M2Times [mmlBinCoeff m k, mmlBinCoeff (M2Apply M2Minus [bigN, m]) (M2Apply M2Minus [m, k])],
+       mmlBinCoeff bigN smalln
+     ]
+
+unToMMLASTPMF k (NegativeBinomialDistribution numFailures prob) =
+  let
+    r = M2Cn "dimensionless" (fromIntegral numFailures)
+    p = M2Cn "dimensionless" prob
+  in
+   M2Apply M2Times
+     [
+       mmlBinCoeff (M2Apply M2Minus [M2Apply M2Plus [k, r], M2Cn "dimensionless" 1]) k,
+       M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, p], r],
+       M2Apply M2Power [p, k]
+     ]
 
 unToMMLASTPMF k (BinomialDistribution numTrials pSuccess) =
   let
@@ -458,7 +630,7 @@ unToMMLASTPMF k (BinomialDistribution numTrials pSuccess) =
      M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, p],
                       M2Apply M2Minus [n, k]]
                    ]
-   
+
 mmlGammaFunc z =
   let
     t = M2Ci "gammaBvar"
@@ -467,9 +639,23 @@ mmlGammaFunc z =
      [M2Apply M2Times [M2Apply M2Power [t, M2Apply M2Minus [z, M2Cn "dimensionless" (-1)]],
                        M2Apply M2Exp [M2Apply M2Minus [t]]]]
 
+mmlBetaFunc alpha beta =
+  let
+    u = M2Ci "betaBvar"
+  in
+   M2Apply (M2Int { m2intDegree = Nothing, m2intLowlimit = Just (M2Cn "dimensionless" 0), m2intUplimit = Just (M2Cn "dimensionless" 1), m2intBvar = "betaBvar" }) [
+     M2Apply M2Times [
+        M2Apply M2Power [u, M2Apply M2Minus [alpha, M2Cn "dimensionless" 1]],
+        M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, u], M2Apply M2Minus [beta, M2Cn "dimensionless" 1]]
+      ]]
+
+mmlBinCoeff n k = M2Apply M2Divide [M2Apply M2Factorial [n],
+                                    M2Apply M2Times [M2Apply M2Factorial [k], M2Apply M2Factorial [M2Apply M2Minus [n, k]]]]
+
 arrowSum :: ArrowPlus a => [a b c] -> a b c
 arrowSum = foldl' (<+>) zeroArrow
 
 convertMultipleDistributions =
   arrowSum [convertRealisations]
+
 convertRealisations = undefined
