@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WishartDistribution xmlns="http://www.uncertml.org/2.0">
+  <degreesOfFreedom>3</degreesOfFreedom>
+  <scaleMatrix dimension="2">
+    <values>
+      1 2 2 3
+    </values>
+  </scaleMatrix>
+</WishartDistribution>

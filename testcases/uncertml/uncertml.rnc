@@ -1,0 +1,575 @@
+default namespace = "http://www.uncertml.org/2.0"
+
+start =
+  (notAllowed | anonymous50)
+  | (notAllowed | anonymous41)
+  | (notAllowed | anonymous47)
+  | (notAllowed | anonymous9)
+  | (notAllowed | anonymous4)
+  | AbstractSummaryStatistic
+  | (notAllowed | anonymous8)
+  | (notAllowed | anonymous7)
+  | (notAllowed | anonymous49)
+  | AbstractDistribution
+  | (notAllowed | anonymous6)
+  | Realisation
+  | (notAllowed | anonymous22)
+  | (notAllowed | anonymous38)
+  | (notAllowed | anonymous32)
+  | (notAllowed | anonymous23)
+  | (notAllowed | anonymous60)
+  | (notAllowed | anonymous52)
+  | (notAllowed | anonymous15)
+  | (notAllowed | anonymous31)
+  | (notAllowed | anonymous30)
+  | (notAllowed | anonymous37)
+  | (notAllowed | anonymous55)
+  | (notAllowed | anonymous26)
+  | (notAllowed | anonymous53)
+  | (notAllowed | anonymous40)
+  | (notAllowed | anonymous61)
+  | (notAllowed | anonymous42)
+  | (notAllowed | anonymous45)
+  | (notAllowed | anonymous24)
+  | (anonymous32 | anonymous0 | anonymous1)
+  | (notAllowed | anonymous18)
+  | (notAllowed | anonymous25)
+  | (notAllowed | anonymous48)
+  | (notAllowed | anonymous17)
+  | (notAllowed | anonymous36)
+  | (notAllowed | anonymous20)
+  | (notAllowed | anonymous27)
+  | (notAllowed | anonymous21)
+  | (notAllowed | anonymous59)
+  | (notAllowed | anonymous0)
+  | (notAllowed | anonymous14)
+  | (notAllowed | anonymous3)
+  | (notAllowed | anonymous58)
+  | (notAllowed | anonymous1)
+  | (notAllowed | anonymous12)
+  | (notAllowed | anonymous54)
+  | (notAllowed | anonymous13)
+  | (notAllowed | anonymous35)
+  | (notAllowed | anonymous34)
+  | (notAllowed | anonymous33)
+  | (notAllowed | anonymous11)
+  | (notAllowed | anonymous43)
+  | (notAllowed | anonymous19)
+  | (notAllowed | anonymous56)
+  | (anonymous50
+     | anonymous41
+     | anonymous47
+     | anonymous9
+     | anonymous4
+     | element AbstractSummaryStatistic { notAllowed }
+     | anonymous8
+     | anonymous7
+     | anonymous49
+     | element AbstractDistribution { notAllowed }
+     | anonymous6
+     | anonymous2
+     | anonymous22
+     | anonymous38
+     | anonymous32
+     | anonymous23
+     | anonymous60
+     | anonymous52
+     | anonymous15
+     | anonymous31
+     | anonymous30
+     | anonymous37
+     | anonymous55
+     | anonymous26
+     | anonymous53
+     | anonymous40
+     | anonymous61
+     | anonymous42
+     | anonymous45
+     | anonymous24
+     | element AbstractSample { notAllowed }
+     | anonymous18
+     | anonymous25
+     | anonymous48
+     | anonymous17
+     | anonymous36
+     | anonymous20
+     | anonymous27
+     | anonymous21
+     | anonymous59
+     | anonymous0
+     | anonymous14
+     | anonymous3
+     | anonymous58
+     | anonymous1
+     | anonymous12
+     | anonymous54
+     | anonymous13
+     | anonymous35
+     | anonymous34
+     | anonymous33
+     | anonymous11
+     | anonymous43
+     | anonymous19
+     | anonymous56
+     | anonymous44
+     | anonymous46
+     | anonymous16
+     | anonymous39)
+  | (notAllowed | anonymous44)
+  | (notAllowed | anonymous46)
+  | (notAllowed | anonymous16)
+  | (notAllowed | anonymous39)
+ContinuousValuesType =
+  (HREFAttributeGroup,
+   list { xsd:double* }),
+  empty
+anonymous0 = element UnknownSample { anonymous57, Realisation+ }
+anonymous1 = element RandomSample { anonymous57, Realisation+ }
+AbstractDistribution =
+  anonymous41
+  | anonymous9
+  | anonymous4
+  | anonymous8
+  | anonymous49
+  | anonymous6
+  | anonymous22
+  | anonymous23
+  | anonymous52
+  | anonymous30
+  | anonymous37
+  | anonymous55
+  | anonymous42
+  | anonymous48
+  | anonymous17
+  | anonymous20
+  | anonymous59
+  | anonymous3
+  | anonymous58
+  | anonymous54
+  | anonymous13
+  | anonymous33
+  | anonymous11
+  | anonymous43
+  | anonymous19
+  | anonymous56
+  | anonymous16
+  | anonymous39
+anonymous2 =
+  element Realisation {
+    anonymous51,
+    element weight { xsd:double }?,
+    (element values { ContinuousValuesType }
+     | element categories { CategoricalValuesType }),
+    attribute id { xsd:ID }?
+  }
+anonymous4 =
+  element WishartDistribution {
+    anonymous5,
+    element degreesOfFreedom {
+      xsd:double { minExclusive = "0.0" }
+    },
+    element scaleMatrix { CovarianceMatrixType }
+  }
+anonymous3 =
+  element DirichletDistribution {
+    anonymous5,
+    element concentration { PositiveRealValuesType }
+  }
+anonymous5 = anonymous51
+anonymous6 =
+  element ExponentialDistribution {
+    anonymous5,
+    element rate { PositiveRealValuesType }
+  }
+anonymous7 =
+  element Kurtosis {
+    anonymous10,
+    element values {
+      HREFAttributeGroup,
+      list {
+        xsd:double { minInclusive = "-2.0" }*
+      }
+    }
+  }
+anonymous8 =
+  element FDistribution {
+    anonymous5,
+    element denominator { NaturalNumbersType },
+    element numerator { NaturalNumbersType }
+  }
+anonymous9 =
+  element NormalInverseGammaDistribution {
+    anonymous5,
+    element mean { ContinuousValuesType },
+    element varianceScaling { PositiveRealValuesType },
+    element shape { PositiveRealValuesType },
+    element scale { PositiveRealValuesType }
+  }
+anonymous10 = anonymous51
+anonymous12 =
+  element Range {
+    anonymous10,
+    element lower { ContinuousValuesType },
+    element upper { ContinuousValuesType }
+  }
+anonymous11 =
+  element PoissonDistribution {
+    anonymous5,
+    element rate { PositiveRealValuesType }
+  }
+anonymous13 =
+  element WeibullDistribution {
+    anonymous5,
+    element scale { PositiveRealValuesType },
+    element shape { PositiveRealValuesType }
+  }
+anonymous15 =
+  element Mode {
+    anonymous10,
+    (element values { ContinuousValuesType }
+     | element categories { CategoricalValuesType })
+  }
+anonymous14 =
+  element CoefficientOfVariation {
+    anonymous10,
+    element values { ContinuousValuesType }
+  }
+anonymous16 =
+  element StudentTDistribution {
+    anonymous5,
+    element location { ContinuousValuesType },
+    element scale { PositiveRealValuesType },
+    element degreesOfFreedom { PositiveNaturalNumbersType }
+  }
+anonymous17 =
+  element CauchyDistribution {
+    anonymous5,
+    element location { ContinuousValuesType },
+    element scale { PositiveRealValuesType }
+  }
+anonymous18 =
+  element CentredMoment {
+    anonymous10,
+    element values { ContinuousValuesType },
+    attribute order {
+      xsd:integer { minInclusive = "0" }
+    }
+  }
+anonymous19 =
+  element MixtureModel {
+    anonymous5,
+    element component {
+      attribute weight {
+        xsd:double { minInclusive = "0.0" maxInclusive = "1.0" }
+      },
+      AbstractDistribution
+    }+
+  }
+PositiveNaturalNumbersType =
+  (HREFAttributeGroup,
+   list {
+     xsd:integer { minInclusive = "0" }*
+   }),
+  empty
+PositiveRealValuesType =
+  (HREFAttributeGroup,
+   list {
+     xsd:double { minExclusive = "0.0" }*
+   }),
+  empty
+anonymous20 =
+  element LogisticDistribution {
+    anonymous5,
+    element location { ContinuousValuesType },
+    element scale { PositiveRealValuesType }
+  }
+anonymous23 =
+  element BernoulliDistribution {
+    anonymous5,
+    element probabilities { ProbabilityValuesType }
+  }
+anonymous22 =
+  element MultinomialDistribution {
+    anonymous5,
+    element numberOfTrials {
+      xsd:integer { minInclusive = "1" }
+    },
+    element probabilities { ProbabilityValuesType }
+  }
+anonymous21 =
+  element InterquartileRange {
+    anonymous10,
+    element lower { ContinuousValuesType },
+    element upper { ContinuousValuesType }
+  }
+anonymous24 =
+  element Variance {
+    anonymous10,
+    element values { ContinuousValuesType }
+  }
+anonymous25 =
+  element Percentile {
+    anonymous10,
+    element values { ContinuousValuesType },
+    attribute level {
+      xsd:int { minInclusive = "0" maxInclusive = "100" }
+    }
+  }
+anonymous26 =
+  element Decile {
+    anonymous10,
+    element values { ContinuousValuesType },
+    attribute level {
+      xsd:integer { minInclusive = "1" maxInclusive = "9" }
+    }
+  }
+anonymous27 =
+  element Moment {
+    anonymous10,
+    element values { ContinuousValuesType },
+    attribute order {
+      xsd:integer { minInclusive = "0" }
+    }
+  }
+anonymous28 =
+  anonymous10,
+  (notAllowed
+   | element values { ContinuousValuesType }),
+  attribute dimension {
+    xsd:integer { minInclusive = "0" }
+  }
+Realisation = notAllowed | anonymous2
+anonymous29 =
+  anonymous10,
+  (notAllowed
+   | element values { ContinuousValuesType }),
+  attribute level {
+    xsd:double { minInclusive = "0.0" maxInclusive = "1.0" }
+  }
+anonymous30 =
+  element LaplaceDistribution {
+    anonymous5,
+    element location { ContinuousValuesType },
+    element scale { PositiveRealValuesType }
+  }
+anonymous31 =
+  element Skewness {
+    anonymous10,
+    element values { ContinuousValuesType }
+  }
+anonymous32 = element SystematicSample { anonymous57, Realisation+ }
+anonymous33 =
+  element NegativeBinomialDistribution {
+    anonymous5,
+    element numberOfFailures { NaturalNumbersType },
+    element probability { ProbabilityValuesType }
+  }
+anonymous34 =
+  element Median {
+    anonymous10,
+    element values { ContinuousValuesType }
+  }
+anonymous36 =
+  element StandardDeviation {
+    anonymous10,
+    element values { ContinuousValuesType }
+  }
+anonymous37 =
+  element UniformDistribution {
+    anonymous5,
+    ((element minimum { ContinuousValuesType },
+      element maximum { ContinuousValuesType })
+     | element numberOfClasses { PositiveNaturalNumbersType })
+  }
+QuantileType = anonymous29, empty
+anonymous35 = element CovarianceMatrix { anonymous28 }
+\string = xsd:string
+anonymous38 =
+  element ConfusionMatrix {
+    anonymous10,
+    element sourceCategories { CategoricalValuesType },
+    element targetCategories { CategoricalValuesType },
+    element counts { PositiveNaturalNumbersType }
+  }
+anonymous39 =
+  element ChiSquareDistribution {
+    anonymous5,
+    element degreesOfFreedom { PositiveNaturalNumbersType }
+  }
+anonymous40 =
+  element DiscreteProbability {
+    anonymous10,
+    element categories {
+      list { xsd:string* },
+      attribute mimeType { \string }?,
+      attribute href { anyURI }?
+    },
+    element probabilities { ProbabilityValuesType }
+  }
+anyURI = xsd:anyURI
+NaturalNumbersType =
+  (HREFAttributeGroup,
+   list {
+     xsd:integer { minInclusive = "0" }*
+   }),
+  empty
+anonymous41 =
+  element ParetoDistribution {
+    anonymous5,
+    element scale { PositiveRealValuesType },
+    element shape { PositiveRealValuesType }
+  }
+anonymous42 =
+  element GeometricDistribution {
+    anonymous5,
+    element probability { ProbabilityValuesType }
+  }
+anonymous43 =
+  element LogNormalDistribution {
+    anonymous5,
+    element logScale { ContinuousValuesType },
+    element shape { PositiveRealValuesType }
+  }
+anonymous44 =
+  element Mean {
+    anonymous10,
+    element values { ContinuousValuesType }
+  }
+HREFAttributeGroup =
+  attribute mimeType { \string }?,
+  attribute href { anyURI }?
+anonymous45 =
+  element Quartile {
+    anonymous10,
+    element values { ContinuousValuesType },
+    attribute level {
+      xsd:double { pattern = "0.25|0.50|0.75|1.00" }
+    }
+  }
+anonymous46 =
+  element StatisticsCollection {
+    anonymous10, AbstractSummaryStatistic+
+  }
+anonymous47 =
+  element Correlation {
+    anonymous10,
+    element values {
+      HREFAttributeGroup,
+      list {
+        xsd:double { minInclusive = "-1.0" maxInclusive = "1.0" }*
+      }
+    }
+  }
+anonymous48 =
+  element GammaDistribution {
+    anonymous5,
+    element shape { PositiveRealValuesType },
+    element scale { PositiveRealValuesType }
+  }
+AbstractSummaryStatistic =
+  anonymous50
+  | anonymous47
+  | anonymous7
+  | anonymous38
+  | anonymous60
+  | anonymous15
+  | anonymous31
+  | anonymous26
+  | anonymous53
+  | anonymous40
+  | anonymous61
+  | anonymous45
+  | anonymous24
+  | anonymous18
+  | anonymous25
+  | anonymous36
+  | anonymous27
+  | anonymous21
+  | anonymous14
+  | anonymous12
+  | anonymous35
+  | anonymous34
+  | anonymous44
+  | anonymous46
+anonymous49 =
+  element BinomialDistribution {
+    anonymous5,
+    element numberOfTrials { NaturalNumbersType },
+    element probabilityOfSuccess { ProbabilityValuesType }
+  }
+anonymous50 =
+  element Probability {
+    anonymous10,
+    element probabilities { ProbabilityValuesType },
+    attribute gt { xsd:double }?,
+    attribute lt { xsd:double }?,
+    attribute ge { xsd:double }?,
+    attribute le { xsd:double }?
+  }
+anonymous51 = empty
+anonymous52 =
+  element BetaDistribution {
+    anonymous5,
+    element alpha { PositiveRealValuesType },
+    element beta { PositiveRealValuesType }
+  }
+anonymous53 = element Quantile { anonymous29 }
+anonymous54 =
+  element HypergeometricDistribution {
+    anonymous5,
+    element numberOfSuccesses { NaturalNumbersType },
+    element numberOfTrials { NaturalNumbersType },
+    element populationSize { NaturalNumbersType }
+  }
+anonymous55 =
+  element MultivariateNormalDistribution {
+    anonymous5,
+    element mean { ContinuousValuesType },
+    element covarianceMatrix { CovarianceMatrixType }
+  }
+anonymous56 =
+  element InverseGammaDistribution {
+    anonymous5,
+    element shape { PositiveRealValuesType },
+    element scale { PositiveRealValuesType }
+  }
+anonymous57 =
+  anonymous51,
+  (notAllowed
+   | element samplingMethodDescription { xsd:string })?
+CovarianceMatrixType = anonymous28, empty
+anonymous58 =
+  element MultivariateStudentTDistribution {
+    anonymous5,
+    element mean { ContinuousValuesType },
+    element covarianceMatrix { CovarianceMatrixType },
+    element degreesOfFreedom { PositiveNaturalNumbersType }
+  }
+anonymous59 =
+  element NormalDistribution {
+    anonymous5,
+    element mean { ContinuousValuesType },
+    element variance { PositiveRealValuesType }
+  }
+ProbabilityValuesType =
+  (HREFAttributeGroup,
+   list {
+     xsd:double { minInclusive = "0.0" maxInclusive = "1.0" }*
+   }),
+  empty
+anonymous60 =
+  element CredibleInterval {
+    anonymous10,
+    element lower { QuantileType },
+    element upper { QuantileType }
+  }
+CategoricalValuesType =
+  (HREFAttributeGroup,
+   list { xsd:string* }),
+  empty
+anonymous61 =
+  element ConfidenceInterval {
+    anonymous10,
+    element lower { QuantileType },
+    element upper { QuantileType }
+  }

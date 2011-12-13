@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MultinomialDistribution xmlns="http://www.uncertml.org/2.0">
+  <numberOfTrials>10</numberOfTrials>
+  <probabilities>0.3 0.4 0.2 0.1</probabilities>
+</MultinomialDistribution>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MultivariateNormalDistribution xmlns="http://www.uncertml.org/2.0">
+  <mean>10 20 10 1</mean>
+  <covarianceMatrix dimension="4">
+    <values>
+    1   0.5 0.2 0.3
+    0.5   1 0.6 0.4
+    0.2 0.6   1 0.7
+    0.3 0.4 0.7   1
+    </values>
+  </covarianceMatrix>
+</MultivariateNormalDistribution>

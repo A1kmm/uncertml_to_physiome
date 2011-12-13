@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MixtureModel xmlns="http://www.uncertml.org/2.0">
+  <component weight="0.5">
+    <NormalDistribution>
+      <mean>10</mean>
+      <variance>1</variance>
+    </NormalDistribution>
+  </component>
+  <component weight="0.5">
+    <GammaDistribution>
+      <shape>1.23</shape>
+      <scale>4.56</scale>
+    </GammaDistribution>
+  </component>
+</MixtureModel>

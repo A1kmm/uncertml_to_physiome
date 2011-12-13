@@ -5,6 +5,8 @@ import Data.List
 import Text.Parsec
 import Text.Parsec.Token
 import Text.Parsec.Language
+import Text.XML.HXT.Arrow.ParserInterface
+import Data.Maybe
 
 data UncertMLDistribution =
   AsSamples [[Double]] |
@@ -57,7 +59,7 @@ data UncertMLDistribution =
 
 data MathML2Expression = M2Apply MathML2Op [MathML2Expression] | M2Ci String | M2Cn String Double | M2Lambda String MathML2Expression | M2Vector [MathML2Expression] | M2True |
                          M2False | M2Infinity | M2Pi | M2EulerGamma | M2ExponentialE | M2Piecewise [(MathML2Expression, MathML2Expression)] (Maybe MathML2Expression) deriving (Eq, Ord, Show)
-data MathML2Op = M2Quotient | M2Factorial | M2Divide | M2Max | M2Min | M2Minus | M2Plus | M2Power | M2Rem | M2Times | M2Root { m2rootDegree :: Maybe MathML2Expression } | M2Gcd | M2And | M2Or | M2Xor | M2Not | M2Implies | M2Abs | M2Lcm | M2Floor | M2Ceiling | M2Eq | M2Neq | M2Gt | M2Lt | M2Geq | M2Leq | M2Factorof | M2Int { m2intLowlimit :: Maybe MathML2Expression, m2intUplimit :: Maybe MathML2Expression, m2intDegree :: Maybe MathML2Expression, m2intBvar :: String } | M2Diff { m2intBvar :: String } | M2Exp | M2Ln | M2Log { m2logLogbase :: Maybe MathML2Expression } | M2Csymbol String  deriving (Eq, Ord, Show)
+data MathML2Op = M2Quotient | M2Factorial | M2Divide | M2Max | M2Min | M2Minus | M2Plus | M2Power | M2Rem | M2Times | M2Root { m2rootDegree :: Maybe MathML2Expression } | M2Gcd | M2And | M2Or | M2Xor | M2Not | M2Implies | M2Abs | M2Lcm | M2Floor | M2Ceiling | M2Eq | M2Neq | M2Gt | M2Lt | M2Geq | M2Leq | M2Factorof | M2Int { m2intLowlimit :: Maybe MathML2Expression, m2intUplimit :: Maybe MathML2Expression, m2intDegree :: Maybe MathML2Expression, m2intBvar :: String } | M2Diff { m2diffBvar :: String } | M2Exp | M2Ln | M2Log { m2logLogbase :: Maybe MathML2Expression } | M2Csymbol String  deriving (Eq, Ord, Show)
 
 liftArrow :: Arrow a => (c -> d) -> a b c -> a b d
 liftArrow = flip (>>^)
@@ -225,6 +227,77 @@ xmlToUncertMLDistribution =
      (getChildren >>> hasQName (mkNsName "un:probabilities" uncertmlNS) >>> readCombinedChildText)
   )
 
+m2ToXML = (\v -> (mathml2ToXML v, v)) ^>> app
+
+mathml2ToXML :: ArrowXml a => MathML2Expression -> a b XmlTree
+mathml2ToXML (M2Apply op subexprs) =
+  mkqelem (mkNsName "mml:apply" mathmlNS) []
+          (mathml2OpToXML op ++ map mathml2ToXML subexprs)
+mathml2ToXML (M2Ci ciName) =
+  mkqelem (mkNsName "mml:ci" mathmlNS) [] [txt ciName]
+  
+mathml2ToXML (M2Cn unitsName cnValue) =
+  mkqelem (mkNsName "mml:cn" mathmlNS)
+    [sqattr (mkNsName "cellml:units" cellmlNS) unitsName] [txt $ show cnValue]
+  
+To do next: MathML2ToXML for
+M2Lambda String MathML2Expression | M2Vector [MathML2Expression] | M2True |
+                         M2False | M2Infinity | M2Pi | M2EulerGamma | M2ExponentialE | M2Piecewise [(MathML2Expression, MathML2Expression)] (Maybe MathML2Expression) deriving (Eq, Ord, Show)
+
+
+
+mathml2OpToXML M2Quotient = [mkqelem (mkNsName "mml:quotient" mathmlNS) [] []]
+mathml2OpToXML M2Factorial = [mkqelem (mkNsName "mml:factorial" mathmlNS) [] []]
+mathml2OpToXML M2Max = [mkqelem (mkNsName "mml:max" mathmlNS) [] []]
+mathml2OpToXML M2Min = [mkqelem (mkNsName "mml:min" mathmlNS) [] []]
+mathml2OpToXML M2Minus = [mkqelem (mkNsName "mml:minus" mathmlNS) [] []]
+mathml2OpToXML M2Plus = [mkqelem (mkNsName "mml:plus" mathmlNS) [] []]
+mathml2OpToXML M2Power = [mkqelem (mkNsName "mml:power" mathmlNS) [] []]
+mathml2OpToXML M2Rem = [mkqelem (mkNsName "mml:rem" mathmlNS) [] []]
+mathml2OpToXML M2Times = [mkqelem (mkNsName "mml:times" mathmlNS) [] []]
+mathml2OpToXML (M2Root { m2rootDegree = mex }) =
+  [mkqelem (mkNsName "mml:root" mathmlNS) [] [],
+   mkqelem (mkNsName "mml:degree" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $
+                                                    maybeToList mex)]
+mathml2OpToXML M2Gcd = [mkqelem (mkNsName "mml:gcd" mathmlNS) [] []]
+mathml2OpToXML M2And = [mkqelem (mkNsName "mml:and" mathmlNS) [] []]
+mathml2OpToXML M2Or = [mkqelem (mkNsName "mml:or" mathmlNS) [] []]
+mathml2OpToXML M2Xor = [mkqelem (mkNsName "mml:xor" mathmlNS) [] []]
+mathml2OpToXML M2Not = [mkqelem (mkNsName "mml:not" mathmlNS) [] []]
+mathml2OpToXML M2Implies = [mkqelem (mkNsName "mml:implies" mathmlNS) [] []]
+mathml2OpToXML M2Abs = [mkqelem (mkNsName "mml:abs" mathmlNS) [] []]
+mathml2OpToXML M2Lcm = [mkqelem (mkNsName "mml:lcm" mathmlNS) [] []]
+mathml2OpToXML M2Floor = [mkqelem (mkNsName "mml:floor" mathmlNS) [] []]
+mathml2OpToXML M2Ceiling = [mkqelem (mkNsName "mml:ceiling" mathmlNS) [] []]
+mathml2OpToXML M2Eq = [mkqelem (mkNsName "mml:eq" mathmlNS) [] []]
+mathml2OpToXML M2Neq = [mkqelem (mkNsName "mml:neq" mathmlNS) [] []]
+mathml2OpToXML M2Gt = [mkqelem (mkNsName "mml:gt" mathmlNS) [] []]
+mathml2OpToXML M2Lt = [mkqelem (mkNsName "mml:lt" mathmlNS) [] []]
+mathml2OpToXML M2Geq = [mkqelem (mkNsName "mml:geq" mathmlNS) [] []]
+mathml2OpToXML M2Leq = [mkqelem (mkNsName "mml:leq" mathmlNS) [] []]
+mathml2OpToXML M2Factorof = [mkqelem (mkNsName "mml:factorof" mathmlNS) [] []]
+mathml2OpToXML (M2Int { m2intLowlimit = mll, m2intUplimit = mul, m2intDegree = mid,
+                        m2intBvar = ib } ) =
+  [mkqelem (mkNsName "mml:int" mathmlNS) [] [],
+   mkqelem (mkNsName "mml:lowlimit" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mll),
+   mkqelem (mkNsName "mml:uplimit" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mul),
+   mkqelem (mkNsName "mml:degree" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mid),
+   mkqelem (mkNsName "mml:bvar" mathmlNS)
+     [] [mkqelem (mkNsName "mml:ci" mathmlNS) [] [txt ib]]
+   ]
+mathml2OpToXML (M2Diff { m2diffBvar = db }) =
+  [mkqelem (mkNsName "mml:diff" mathmlNS) [] [],
+   mkqelem (mkNsName "mml:bvar" mathmlNS)
+     [] [mkqelem (mkNsName "mml:ci" mathmlNS) [] [txt db]]
+  ]
+
+mathml2OpToXML M2Exp = [mkqelem (mkNsName "mml:exp" mathmlNS) [] []]
+mathml2OpToXML M2Ln = [mkqelem (mkNsName "mml:ln" mathmlNS) [] []]
+mathml2OpToXML (M2Log { m2logLogbase = mlb }) =
+  [mkqelem (mkNsName "mml:log" mathmlNS) [] [],
+   mkqelem (mkNsName "mml:logbase" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mlb)]
+mathml2OpToXML (M2Csymbol cs) = [mkqelem (mkNsName "mml:csymbol" mathmlNS) [] [txt cs]]
+
 readCovarianceMatrix = hasQName (mkNsName "un:covarianceMatrix" uncertmlNS) >>>
                        liftArrow2 chunkList (getAttrValue "dimension" >>^ read) (getChildren >>> hasQName (mkNsName "un:values" uncertmlNS) >>>
                                                                                  parseCombinedChildText uncertmlListOfFloat)
@@ -235,6 +308,8 @@ chunkList dim l = let
      h:(chunkList dim t)
 
 uncertmlNS = "http://www.uncertml.org/2.0"
+mathmlNS = "http://www.w3.org/1998/Math/MathML"
+cellmlNS = "http://www.cellml.org/cellml/1.1#"
 randomSampleName = mkNsName "un:RandomSample" uncertmlNS
 realisationName = mkNsName "un:Realisation" uncertmlNS
 
@@ -242,7 +317,7 @@ main = do
   liftM doConversion getContents >>= putStr
 
 doConversion :: String -> String
-doConversion = concat . runLA (xread >>> propagateNamespaces >>> (xshow this <+> constA "Out: " <+> (xmlToUncertMLDistribution >>^ show)))
+doConversion = concat . runLA ((\v -> (v, v)) ^>> parseXmlDoc >>> propagateNamespaces >>> (xmlToUncertMLDistribution >>> arr unToMMLAST >>> unlistA >>> m2ToXML >>^ show))
 
 unIsDiscrete (GeometricDistribution {}) = True
 unIsDiscrete (HypergeometricDistribution {}) = True
@@ -269,11 +344,14 @@ unToMMLAST (NormalInverseGammaDistribution mean varScal shape scale) =
   in
    error "Normal Inverse Gamma Distribution: To do"
    
-unToMMLAST v | unIsDiscrete v =
-  [
+unToMMLAST v = [M2Apply M2Eq [M2Ci "outvar",
+                              unToMMLExprAST v
+                             ]
+               ]
+
+unToMMLExprAST v | unIsDiscrete v =
     M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromMass") [M2Lambda "massBvar" $ unToMMLASTPMF (M2Ci "massBvar") v]
-  ]
-             | otherwise = [M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity") [M2Lambda "densityBvar" $ unToMMLASTPDF (M2Ci "densityBvar") v]]
+                 | otherwise = M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity") [M2Lambda "densityBvar" $ unToMMLASTPDF (M2Ci "densityBvar") v]
 
 unToMMLASTPDF x (ExponentialDistribution rate) =
   M2Piecewise [(M2Cn "dimensionless" 0, M2Apply M2Lt [x, (M2Cn "dimensionless" 0)])] $ Just $
@@ -301,7 +379,7 @@ unToMMLASTPDF x (InverseGammaDistribution shape scale) =
      ]
 
 unToMMLASTPDF x (NormalInverseGammaDistribution mean varScal shape scale) =
-  error "Normal Inverse Gamma Distribution is not yet supported"
+  error "Normal Inverse Gamma Distribution cannot currently be used in a mixture model"
 
 unToMMLASTPDF x (NormalDistribution mean var) =
   let
@@ -403,11 +481,11 @@ unToMMLASTPDF x (UniformDistribution min max) =
 
 unToMMLASTPDF x (MixtureModel components) =
   M2Apply M2Plus $ flip map components $ \(weight, component) -> 
-    M2Apply M2Times [M2Cn "dimensionless" weight, unToMMLAST component]
+    M2Apply M2Times [M2Cn "dimensionless" weight, unToMMLExprAST component]
 
-unToMMLASTPDF x (MultivariateNormalDistribution mean cov) = error "Multivariate normal distribution not yet implemented"
+unToMMLASTPDF x (MultivariateNormalDistribution mean cov) = error "Multivariate normal distribution cannot currently be used in a mixture model"
 
-unToMMLASTPDF x (MultivariateStudentTDistribution mean cov degf) = error "Multivariate student-T distribution not yet implemented"
+unToMMLASTPDF x (MultivariateStudentTDistribution mean cov degf) = error "Multivariate student-T distribution cannot currently be used in a mixture model"
 
 unToMMLASTPDF x (BetaDistribution alphaP betaP) =
   let

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StudentTDistribution xmlns="http://www.uncertml.org/2.0">
+  <location>10</location>
+  <scale>2</scale>
+  <degreesOfFreedom>5</degreesOfFreedom>
+</StudentTDistribution>

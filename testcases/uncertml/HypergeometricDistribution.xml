@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HypergeometricDistribution xmlns="http://www.uncertml.org/2.0">
+  <numberOfSuccesses>1</numberOfSuccesses>
+  <numberOfTrials>2</numberOfTrials>
+  <populationSize>3</populationSize>
+</HypergeometricDistribution>

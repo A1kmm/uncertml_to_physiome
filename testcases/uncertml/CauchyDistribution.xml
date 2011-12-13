@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CauchyDistribution xmlns="http://www.uncertml.org/2.0">
+  <location>1.23</location>
+  <scale>4.56</scale>
+</CauchyDistribution>

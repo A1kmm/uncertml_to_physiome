@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GeometricDistribution xmlns="http://www.uncertml.org/2.0">
+  <probability>0.3</probability>
+</GeometricDistribution>

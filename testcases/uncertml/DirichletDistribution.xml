@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirichletDistribution xmlns="http://www.uncertml.org/2.0">
+  <concentration>1.23</concentration>
+</DirichletDistribution>

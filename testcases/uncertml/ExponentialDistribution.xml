@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ExponentialDistribution xmlns="http://www.uncertml.org/2.0">
+  <rate>10</rate>
+</ExponentialDistribution>

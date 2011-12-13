@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NormalInverseGammaDistribution xmlns="http://www.uncertml.org/2.0">
+  <mean>1</mean>
+  <varianceScaling>0.2</varianceScaling>
+  <shape>0.3</shape>
+  <scale>0.9</scale>
+</NormalInverseGammaDistribution>

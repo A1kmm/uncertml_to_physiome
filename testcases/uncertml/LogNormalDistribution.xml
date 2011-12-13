@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LogNormalDistribution xmlns="http://www.uncertml.org/2.0">
+  <logScale>1.23</logScale>
+  <shape>4.56</shape>
+</LogNormalDistribution>

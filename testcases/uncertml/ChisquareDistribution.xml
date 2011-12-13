@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ChiSquareDistribution xmlns="http://www.uncertml.org/2.0">
+  <degreesOfFreedom>10</degreesOfFreedom>
+</ChiSquareDistribution>
