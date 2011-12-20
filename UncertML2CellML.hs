@@ -438,10 +438,57 @@ unToMMLAST (DirichletDistribution _) = error "Invalid Dirichlet distribution - a
 
 unToMMLAST (NormalInverseGammaDistribution mean varScal shape scale) =
   let
+    x = M2Ci "x"
     lambda = M2Cn "dimensionless" mean
+    nu = M2Cn "dimensionless" varScal
+    alpha = M2Cn "dimensionless" shape
+    beta = M2Cn "dimensionless" scale
+    sigma2 = M2Apply M2Divide [ M2Ci "outvar", nu ]
   in
-   error "Normal Inverse Gamma Distribution: To do"
+   [M2Apply M2Eq
+       [M2Ci "outvar",
+        M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution")
+          [
+            M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity")
+              [M2Lambda "x" $
+                M2Apply M2Times [
+                  M2Apply M2Divide [M2Apply M2Power [beta, alpha], mmlGammaFunc alpha],
+                  M2Apply M2Power [x, M2Apply M2Minus [M2Apply M2Minus [alpha],
+                                                       M2Cn "dimensionless" 1]],
+                  M2Apply M2Exp [M2Apply M2Minus [M2Apply M2Divide [beta, x]]]
+                ]
+              ]
+          ]
+       ],
+    M2Apply M2Eq
+      [M2Ci "outmean",
+       M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution")
+         [M2Lambda "x" $
+            M2Apply M2Times [
+              M2Apply M2Divide [M2Cn "dimensionless" 1,
+                                M2Apply (M2Root Nothing) [
+                                  M2Apply M2Times [M2Cn "dimensionless" 2,
+                                                   M2Pi, sigma2]]
+                               ],
+              M2Apply M2Exp [M2Apply M2Minus [
+                                M2Apply M2Divide [
+                                   M2Apply M2Power [M2Apply M2Minus [x, lambda], M2Cn "dimensionless" 2],
+                                   M2Apply M2Times [M2Cn "dimensionless" 2, sigma2]
+                                   ]
+                                ]
+                            ]
+              ]
+         ]
+      ]
+   ]
    
+unToMMLASTPDF x (MultinomialDistribution numTrials (p1:prest)) =
+  let
+    n = M2Cn "dimensionless" numTrials
+    p1 = M2Cn p1
+  (M2Apply M2Eq )
+unToMMLASTPDF x (MultinomialDistribution _ _) = error "Invalid multinomial distribution - need at least one probability."
+
 unToMMLAST v = [M2Apply M2Eq [M2Ci "outvar",
                               M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution")
                                 [unToMMLExprAST v]
@@ -456,6 +503,10 @@ unToMMLASTPDF x (ExponentialDistribution rate) =
   M2Piecewise [(M2Cn "dimensionless" 0, M2Apply M2Lt [x, (M2Cn "dimensionless" 0)])] $ Just $
     M2Apply M2Times [M2Cn "dimensionless" rate,
                      M2Apply M2Exp [M2Apply M2Minus [M2Apply M2Times [M2Cn "dimensionless" rate, x]]]]
+    
+unToMMLASTPDF x (DirichletDistribution _) =
+  error "DirichletDistribution cannot be used in a mixture model"
+  
 unToMMLASTPDF x (GammaDistribution shape scale) =
   let
     shapeP = M2Cn "dimensionless" shape
@@ -500,7 +551,7 @@ unToMMLASTPDF x (NormalDistribution mean var) =
                    ]
      ]
 
-unToMMLASTPDF x (MultinomialDistribution numTrials pSuccesses) = error "Multinomial isn't supported yet"
+unToMMLASTPDF x (MultinomialDistribution numTrials pSuccesses) = error "Multinomial distribution cannot be used from a mixture model"
 
 unToMMLASTPDF x (LogNormalDistribution logScale shape) =
   let
