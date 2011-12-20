@@ -240,14 +240,42 @@ mathml2ToXML (M2Cn unitsName cnValue) =
   mkqelem (mkNsName "mml:cn" mathmlNS)
     [sqattr (mkNsName "cellml:units" cellmlNS) unitsName] [txt $ show cnValue]
   
-To do next: MathML2ToXML for
-M2Lambda String MathML2Expression | M2Vector [MathML2Expression] | M2True |
-                         M2False | M2Infinity | M2Pi | M2EulerGamma | M2ExponentialE | M2Piecewise [(MathML2Expression, MathML2Expression)] (Maybe MathML2Expression) deriving (Eq, Ord, Show)
+mathml2ToXML (M2Lambda str expr) =
+  mkqelem (mkNsName "mml:lambda" mathmlNS) []
+    [mkqelem (mkNsName "mml:bvar" mathmlNS) []
+       [mkqelem (mkNsName "mml:ci" mathmlNS) [] [txt str]],
+     mathml2ToXML expr]
+  
+mathml2ToXML (M2Vector parts) =
+  mkqelem (mkNsName "mml:vector" mathmlNS) [] $
+    map mathml2ToXML parts
 
+mathml2ToXML (M2True) =
+  mkqelem (mkNsName "mml:true" mathmlNS) [] []
+  
+mathml2ToXML (M2False) =
+    mkqelem (mkNsName "mml:false" mathmlNS) [] []
 
+mathml2ToXML (M2Infinity) =
+  mkqelem (mkNsName "mml:infinity" mathmlNS) [] []
+  
+mathml2ToXML (M2Pi) =
+    mkqelem (mkNsName "mml:pi" mathmlNS) [] []
+
+mathml2ToXML (M2EulerGamma) =
+  mkqelem (mkNsName "mml:eulergamma" mathmlNS) [] []
+  
+mathml2ToXML (M2ExponentialE) =
+    mkqelem (mkNsName "mml:exponentiale" mathmlNS) [] []
+
+mathml2ToXML (M2Piecewise pieces maybeOtherwise) =
+    mkqelem (mkNsName "mml:piecewise" mathmlNS) []
+      ((map (\(val, cond) -> mkqelem (mkNsName "mml:piece" mathmlNS) [] [mathml2ToXML val, mathml2ToXML cond]) pieces) ++
+       (map (mkqelem (mkNsName "mml:otherwise" mathmlNS) [] . (:[]) . mathml2ToXML) (maybeToList maybeOtherwise)))
 
 mathml2OpToXML M2Quotient = [mkqelem (mkNsName "mml:quotient" mathmlNS) [] []]
 mathml2OpToXML M2Factorial = [mkqelem (mkNsName "mml:factorial" mathmlNS) [] []]
+mathml2OpToXML M2Divide = [mkqelem (mkNsName "mml:divide" mathmlNS) [] []]
 mathml2OpToXML M2Max = [mkqelem (mkNsName "mml:max" mathmlNS) [] []]
 mathml2OpToXML M2Min = [mkqelem (mkNsName "mml:min" mathmlNS) [] []]
 mathml2OpToXML M2Minus = [mkqelem (mkNsName "mml:minus" mathmlNS) [] []]
@@ -296,7 +324,7 @@ mathml2OpToXML M2Ln = [mkqelem (mkNsName "mml:ln" mathmlNS) [] []]
 mathml2OpToXML (M2Log { m2logLogbase = mlb }) =
   [mkqelem (mkNsName "mml:log" mathmlNS) [] [],
    mkqelem (mkNsName "mml:logbase" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mlb)]
-mathml2OpToXML (M2Csymbol cs) = [mkqelem (mkNsName "mml:csymbol" mathmlNS) [] [txt cs]]
+mathml2OpToXML (M2Csymbol cs) = [mkqelem (mkNsName "mml:csymbol" mathmlNS) [sattr "definitionURL" cs] []]
 
 readCovarianceMatrix = hasQName (mkNsName "un:covarianceMatrix" uncertmlNS) >>>
                        liftArrow2 chunkList (getAttrValue "dimension" >>^ read) (getChildren >>> hasQName (mkNsName "un:values" uncertmlNS) >>>
@@ -317,7 +345,7 @@ main = do
   liftM doConversion getContents >>= putStr
 
 doConversion :: String -> String
-doConversion = concat . runLA ((\v -> (v, v)) ^>> parseXmlDoc >>> propagateNamespaces >>> (xmlToUncertMLDistribution >>> arr unToMMLAST >>> unlistA >>> m2ToXML >>^ show))
+doConversion = concat . runLA (xshow $ mkqelem (mkNsName "mml:math" mathmlNS) [sattr "xmlns:mml" mathmlNS, sattr "xmlns:cellml" cellmlNS] [(\v -> (v, v)) ^>> parseXmlDoc >>> propagateNamespaces >>> (xmlToUncertMLDistribution >>> arr unToMMLAST >>> unlistA >>> m2ToXML)])
 
 unIsDiscrete (GeometricDistribution {}) = True
 unIsDiscrete (HypergeometricDistribution {}) = True
@@ -334,9 +362,79 @@ sampleOutput _ = M2Ci "outvar"
 
 unToMMLAST (AsSamples v) = [M2Apply M2Eq [
                                sampleOutput v,
-                               M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromRealisations")
-                               [M2Vector (map (\r -> M2Vector (map (M2Cn "dimensionless") r)) v)]]]
-unToMMLAST (DirichletDistribution conc) = error "Multivariate dirichlet distrib generator - todo"
+                               M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution")
+                                 [
+                                   M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromRealisations")
+                                     [M2Vector (map (\r -> M2Vector (map (M2Cn "dimensionless") r)) v)]
+                                 ]
+                               ]
+                           ]
+
+unToMMLAST (DirichletDistribution alphafull@(alpha1:(alphatail@(_:_)))) =
+  let
+      x = M2Ci "x"
+      initialAlpha = M2Cn "dimensionless" alpha1
+      initialBeta = M2Cn "dimensionless" (sum alphatail)
+      k = length alphafull
+      out1 = M2Ci "out1"
+      outk = M2Ci ("out" ++ show k)
+      alphatt = tail alphatail
+      partialSums = take (k - 2) $ scanl1 (+) alphafull
+      partialSumsBack = reverse (scanl1 (+) (reverse alphatt))
+      intEqns = map (\(i, alpha, beta) ->
+                      let
+                        a = M2Cn "dimensionless" alpha
+                        b = M2Cn "dimensionless" beta
+                        tmp = M2Ci $ "dirichletIntermediate" ++ (show i)
+                        in
+                         M2Apply M2Eq
+                           [tmp,
+                            M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution")
+                              [
+                                M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity")
+                                  [
+                                    M2Lambda "x" $
+                                      M2Apply M2Times
+                                        [M2Apply M2Divide [M2Cn "dimensionless" 1, mmlBetaFunc a b],
+                                         M2Apply M2Power [x, M2Apply M2Minus [a, M2Cn "dimensionless" 1]],
+                                         M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, x], M2Apply M2Minus [b, M2Cn "dimensionless" 1]]
+                                        ]
+                                  ]
+                              ]
+                           ]
+                    ) $ zip3 [2..] alphatt partialSumsBack
+      varEqns = map (\(i, v) ->
+                      let
+                        outi = M2Ci $ "out" ++ show i
+                        tmpi = M2Ci $ "dirichletIntermediate" ++ show i
+                      in
+                       M2Apply M2Eq [outi,
+                                     M2Apply M2Times [M2Cn "dimensionless" (1 - v), tmpi]]
+                    ) $ zip [2..] partialSums
+   in
+    [M2Apply M2Eq
+      [out1,
+       M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution")
+         [
+           M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity")
+             [
+               M2Lambda "x" $
+                 M2Apply M2Times
+                   [M2Apply M2Divide [M2Cn "dimensionless" 1, mmlBetaFunc initialAlpha initialBeta],
+                    M2Apply M2Power [x, M2Apply M2Minus [initialAlpha, M2Cn "dimensionless" 1]],
+                    M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, x], M2Apply M2Minus [initialBeta, M2Cn "dimensionless" 1]]
+                   ]
+             ]
+         ]
+      ],
+     M2Apply M2Eq
+       [
+         outk,
+         M2Apply M2Minus ((M2Cn "dimensionless" 1):(map (\i -> M2Ci ("out" ++ show i)) [1..(k - 1)]))
+       ]
+    ] ++ intEqns ++ varEqns
+   
+unToMMLAST (DirichletDistribution _) = error "Invalid Dirichlet distribution - at least two concentration parameters required."
 
 unToMMLAST (NormalInverseGammaDistribution mean varScal shape scale) =
   let
@@ -345,7 +443,8 @@ unToMMLAST (NormalInverseGammaDistribution mean varScal shape scale) =
    error "Normal Inverse Gamma Distribution: To do"
    
 unToMMLAST v = [M2Apply M2Eq [M2Ci "outvar",
-                              unToMMLExprAST v
+                              M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution")
+                                [unToMMLExprAST v]
                              ]
                ]
 
@@ -729,11 +828,3 @@ mmlBetaFunc alpha beta =
 
 mmlBinCoeff n k = M2Apply M2Divide [M2Apply M2Factorial [n],
                                     M2Apply M2Times [M2Apply M2Factorial [k], M2Apply M2Factorial [M2Apply M2Minus [n, k]]]]
-
-arrowSum :: ArrowPlus a => [a b c] -> a b c
-arrowSum = foldl' (<+>) zeroArrow
-
-convertMultipleDistributions =
-  arrowSum [convertRealisations]
-
-convertRealisations = undefined
