@@ -1,0 +1,1175 @@
+<?xml version="1.0"?>
+<grammar ns="http://www.uncertml.org/2.0"
+    xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+    <start>
+        <choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous50"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous41"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous47"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous9"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous4"/>
+            </choice>
+            <ref name="AbstractSummaryStatistic"/>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous8"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous7"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous49"/>
+            </choice>
+            <ref name="AbstractDistribution"/>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous6"/>
+            </choice>
+            <ref name="Realisation"/>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous22"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous38"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous32"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous23"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous60"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous52"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous15"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous31"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous30"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous37"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous55"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous26"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous53"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous40"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous61"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous42"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous45"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous24"/>
+            </choice>
+            <choice>
+                <ref name="anonymous32"/>
+                <ref name="anonymous0"/>
+                <ref name="anonymous1"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous18"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous25"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous48"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous17"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous36"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous20"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous27"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous21"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous59"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous0"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous14"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous3"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous58"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous1"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous12"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous54"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous13"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous35"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous34"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous33"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous11"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous43"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous19"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous56"/>
+            </choice>
+            <choice>
+                <ref name="anonymous50"/>
+                <ref name="anonymous41"/>
+                <ref name="anonymous47"/>
+                <ref name="anonymous9"/>
+                <ref name="anonymous4"/>
+                <element name="AbstractSummaryStatistic">
+                    <notAllowed/>
+                </element>
+                <ref name="anonymous8"/>
+                <ref name="anonymous7"/>
+                <ref name="anonymous49"/>
+                <element name="AbstractDistribution">
+                    <notAllowed/>
+                </element>
+                <ref name="anonymous6"/>
+                <ref name="anonymous2"/>
+                <ref name="anonymous22"/>
+                <ref name="anonymous38"/>
+                <ref name="anonymous32"/>
+                <ref name="anonymous23"/>
+                <ref name="anonymous60"/>
+                <ref name="anonymous52"/>
+                <ref name="anonymous15"/>
+                <ref name="anonymous31"/>
+                <ref name="anonymous30"/>
+                <ref name="anonymous37"/>
+                <ref name="anonymous55"/>
+                <ref name="anonymous26"/>
+                <ref name="anonymous53"/>
+                <ref name="anonymous40"/>
+                <ref name="anonymous61"/>
+                <ref name="anonymous42"/>
+                <ref name="anonymous45"/>
+                <ref name="anonymous24"/>
+                <element name="AbstractSample">
+                    <notAllowed/>
+                </element>
+                <ref name="anonymous18"/>
+                <ref name="anonymous25"/>
+                <ref name="anonymous48"/>
+                <ref name="anonymous17"/>
+                <ref name="anonymous36"/>
+                <ref name="anonymous20"/>
+                <ref name="anonymous27"/>
+                <ref name="anonymous21"/>
+                <ref name="anonymous59"/>
+                <ref name="anonymous0"/>
+                <ref name="anonymous14"/>
+                <ref name="anonymous3"/>
+                <ref name="anonymous58"/>
+                <ref name="anonymous1"/>
+                <ref name="anonymous12"/>
+                <ref name="anonymous54"/>
+                <ref name="anonymous13"/>
+                <ref name="anonymous35"/>
+                <ref name="anonymous34"/>
+                <ref name="anonymous33"/>
+                <ref name="anonymous11"/>
+                <ref name="anonymous43"/>
+                <ref name="anonymous19"/>
+                <ref name="anonymous56"/>
+                <ref name="anonymous44"/>
+                <ref name="anonymous46"/>
+                <ref name="anonymous16"/>
+                <ref name="anonymous39"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous44"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous46"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous16"/>
+            </choice>
+            <choice>
+                <notAllowed/>
+                <ref name="anonymous39"/>
+            </choice>
+        </choice>
+    </start>
+    <define name="ContinuousValuesType">
+        <group>
+            <ref name="HREFAttributeGroup"/>
+            <list>
+                <zeroOrMore>
+                    <data type="double"/>
+                </zeroOrMore>
+            </list>
+        </group>
+        <empty/>
+    </define>
+    <define name="anonymous0">
+        <element name="UnknownSample">
+            <ref name="anonymous57"/>
+            <oneOrMore>
+                <ref name="Realisation"/>
+            </oneOrMore>
+        </element>
+    </define>
+    <define name="anonymous1">
+        <element name="RandomSample">
+            <ref name="anonymous57"/>
+            <oneOrMore>
+                <ref name="Realisation"/>
+            </oneOrMore>
+        </element>
+    </define>
+    <define name="AbstractDistribution">
+        <choice>
+            <ref name="anonymous41"/>
+            <ref name="anonymous9"/>
+            <ref name="anonymous4"/>
+            <ref name="anonymous8"/>
+            <ref name="anonymous49"/>
+            <ref name="anonymous6"/>
+            <ref name="anonymous22"/>
+            <ref name="anonymous23"/>
+            <ref name="anonymous52"/>
+            <ref name="anonymous30"/>
+            <ref name="anonymous37"/>
+            <ref name="anonymous55"/>
+            <ref name="anonymous42"/>
+            <ref name="anonymous48"/>
+            <ref name="anonymous17"/>
+            <ref name="anonymous20"/>
+            <ref name="anonymous59"/>
+            <ref name="anonymous3"/>
+            <ref name="anonymous58"/>
+            <ref name="anonymous54"/>
+            <ref name="anonymous13"/>
+            <ref name="anonymous33"/>
+            <ref name="anonymous11"/>
+            <ref name="anonymous43"/>
+            <ref name="anonymous19"/>
+            <ref name="anonymous56"/>
+            <ref name="anonymous16"/>
+            <ref name="anonymous39"/>
+        </choice>
+    </define>
+    <define name="anonymous2">
+        <element name="Realisation">
+            <ref name="anonymous51"/>
+            <optional>
+                <element name="weight">
+                    <data type="double"/>
+                </element>
+            </optional>
+            <choice>
+                <element name="values">
+                    <ref name="ContinuousValuesType"/>
+                </element>
+                <element name="categories">
+                    <ref name="CategoricalValuesType"/>
+                </element>
+            </choice>
+            <optional>
+                <attribute name="id">
+                    <data type="ID"/>
+                </attribute>
+            </optional>
+        </element>
+    </define>
+    <define name="anonymous4">
+        <element name="WishartDistribution">
+            <ref name="anonymous5"/>
+            <element name="degreesOfFreedom">
+                <data type="double">
+                    <param name="minExclusive">0.0</param>
+                </data>
+            </element>
+            <element name="scaleMatrix">
+                <ref name="CovarianceMatrixType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous3">
+        <element name="DirichletDistribution">
+            <ref name="anonymous5"/>
+            <element name="concentration">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous5">
+        <ref name="anonymous51"/>
+    </define>
+    <define name="anonymous6">
+        <element name="ExponentialDistribution">
+            <ref name="anonymous5"/>
+            <element name="rate">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous7">
+        <element name="Kurtosis">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="HREFAttributeGroup"/>
+                <list>
+                    <zeroOrMore>
+                        <data type="double">
+                            <param name="minInclusive">-2.0</param>
+                        </data>
+                    </zeroOrMore>
+                </list>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous8">
+        <element name="FDistribution">
+            <ref name="anonymous5"/>
+            <element name="denominator">
+                <ref name="NaturalNumbersType"/>
+            </element>
+            <element name="numerator">
+                <ref name="NaturalNumbersType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous9">
+        <element name="NormalInverseGammaDistribution">
+            <ref name="anonymous5"/>
+            <element name="mean">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="varianceScaling">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+            <element name="shape">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+            <element name="scale">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous10">
+        <ref name="anonymous51"/>
+    </define>
+    <define name="anonymous12">
+        <element name="Range">
+            <ref name="anonymous10"/>
+            <element name="lower">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="upper">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous11">
+        <element name="PoissonDistribution">
+            <ref name="anonymous5"/>
+            <element name="rate">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous13">
+        <element name="WeibullDistribution">
+            <ref name="anonymous5"/>
+            <element name="scale">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+            <element name="shape">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous15">
+        <element name="Mode">
+            <ref name="anonymous10"/>
+            <choice>
+                <element name="values">
+                    <ref name="ContinuousValuesType"/>
+                </element>
+                <element name="categories">
+                    <ref name="CategoricalValuesType"/>
+                </element>
+            </choice>
+        </element>
+    </define>
+    <define name="anonymous14">
+        <element name="CoefficientOfVariation">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous16">
+        <element name="StudentTDistribution">
+            <ref name="anonymous5"/>
+            <element name="location">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="scale">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+            <element name="degreesOfFreedom">
+                <ref name="PositiveNaturalNumbersType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous17">
+        <element name="CauchyDistribution">
+            <ref name="anonymous5"/>
+            <element name="location">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="scale">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous18">
+        <element name="CentredMoment">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <attribute name="order">
+                <data type="integer">
+                    <param name="minInclusive">0</param>
+                </data>
+            </attribute>
+        </element>
+    </define>
+    <define name="anonymous19">
+        <element name="MixtureModel">
+            <ref name="anonymous5"/>
+            <oneOrMore>
+                <element name="component">
+                    <attribute name="weight">
+                        <data type="double">
+                            <param name="minInclusive">0.0</param>
+                            <param name="maxInclusive">1.0</param>
+                        </data>
+                    </attribute>
+                    <ref name="AbstractDistribution"/>
+                </element>
+            </oneOrMore>
+        </element>
+    </define>
+    <define name="PositiveNaturalNumbersType">
+        <group>
+            <ref name="HREFAttributeGroup"/>
+            <list>
+                <zeroOrMore>
+                    <data type="integer">
+                        <param name="minInclusive">0</param>
+                    </data>
+                </zeroOrMore>
+            </list>
+        </group>
+        <empty/>
+    </define>
+    <define name="PositiveRealValuesType">
+        <group>
+            <ref name="HREFAttributeGroup"/>
+            <list>
+                <zeroOrMore>
+                    <data type="double">
+                        <param name="minExclusive">0.0</param>
+                    </data>
+                </zeroOrMore>
+            </list>
+        </group>
+        <empty/>
+    </define>
+    <define name="anonymous20">
+        <element name="LogisticDistribution">
+            <ref name="anonymous5"/>
+            <element name="location">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="scale">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous23">
+        <element name="BernoulliDistribution">
+            <ref name="anonymous5"/>
+            <element name="probabilities">
+                <ref name="ProbabilityValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous22">
+        <element name="MultinomialDistribution">
+            <ref name="anonymous5"/>
+            <element name="numberOfTrials">
+                <data type="integer">
+                    <param name="minInclusive">1</param>
+                </data>
+            </element>
+            <element name="probabilities">
+                <ref name="ProbabilityValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous21">
+        <element name="InterquartileRange">
+            <ref name="anonymous10"/>
+            <element name="lower">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="upper">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous24">
+        <element name="Variance">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous25">
+        <element name="Percentile">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <attribute name="level">
+                <data type="int">
+                    <param name="minInclusive">0</param>
+                    <param name="maxInclusive">100</param>
+                </data>
+            </attribute>
+        </element>
+    </define>
+    <define name="anonymous26">
+        <element name="Decile">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <attribute name="level">
+                <data type="integer">
+                    <param name="minInclusive">1</param>
+                    <param name="maxInclusive">9</param>
+                </data>
+            </attribute>
+        </element>
+    </define>
+    <define name="anonymous27">
+        <element name="Moment">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <attribute name="order">
+                <data type="integer">
+                    <param name="minInclusive">0</param>
+                </data>
+            </attribute>
+        </element>
+    </define>
+    <define name="anonymous28">
+        <ref name="anonymous10"/>
+        <choice>
+            <notAllowed/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </choice>
+        <attribute name="dimension">
+            <data type="integer">
+                <param name="minInclusive">0</param>
+            </data>
+        </attribute>
+    </define>
+    <define name="Realisation">
+        <choice>
+            <notAllowed/>
+            <ref name="anonymous2"/>
+        </choice>
+    </define>
+    <define name="anonymous29">
+        <ref name="anonymous10"/>
+        <choice>
+            <notAllowed/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </choice>
+        <attribute name="level">
+            <data type="double">
+                <param name="minInclusive">0.0</param>
+                <param name="maxInclusive">1.0</param>
+            </data>
+        </attribute>
+    </define>
+    <define name="anonymous30">
+        <element name="LaplaceDistribution">
+            <ref name="anonymous5"/>
+            <element name="location">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="scale">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous31">
+        <element name="Skewness">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous32">
+        <element name="SystematicSample">
+            <ref name="anonymous57"/>
+            <oneOrMore>
+                <ref name="Realisation"/>
+            </oneOrMore>
+        </element>
+    </define>
+    <define name="anonymous33">
+        <element name="NegativeBinomialDistribution">
+            <ref name="anonymous5"/>
+            <element name="numberOfFailures">
+                <ref name="NaturalNumbersType"/>
+            </element>
+            <element name="probability">
+                <ref name="ProbabilityValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous34">
+        <element name="Median">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous36">
+        <element name="StandardDeviation">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous37">
+        <element name="UniformDistribution">
+            <ref name="anonymous5"/>
+            <choice>
+                <group>
+                    <element name="minimum">
+                        <ref name="ContinuousValuesType"/>
+                    </element>
+                    <element name="maximum">
+                        <ref name="ContinuousValuesType"/>
+                    </element>
+                </group>
+                <element name="numberOfClasses">
+                    <ref name="PositiveNaturalNumbersType"/>
+                </element>
+            </choice>
+        </element>
+    </define>
+    <define name="QuantileType">
+        <ref name="anonymous29"/>
+        <empty/>
+    </define>
+    <define name="anonymous35">
+        <element name="CovarianceMatrix">
+            <ref name="anonymous28"/>
+        </element>
+    </define>
+    <define name="string">
+        <data type="string"/>
+    </define>
+    <define name="anonymous38">
+        <element name="ConfusionMatrix">
+            <ref name="anonymous10"/>
+            <element name="sourceCategories">
+                <ref name="CategoricalValuesType"/>
+            </element>
+            <element name="targetCategories">
+                <ref name="CategoricalValuesType"/>
+            </element>
+            <element name="counts">
+                <ref name="PositiveNaturalNumbersType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous39">
+        <element name="ChiSquareDistribution">
+            <ref name="anonymous5"/>
+            <element name="degreesOfFreedom">
+                <ref name="PositiveNaturalNumbersType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous40">
+        <element name="DiscreteProbability">
+            <ref name="anonymous10"/>
+            <element name="categories">
+                <list>
+                    <zeroOrMore>
+                        <data type="string"/>
+                    </zeroOrMore>
+                </list>
+                <optional>
+                    <attribute name="mimeType">
+                        <ref name="string"/>
+                    </attribute>
+                </optional>
+                <optional>
+                    <attribute name="href">
+                        <ref name="anyURI"/>
+                    </attribute>
+                </optional>
+            </element>
+            <element name="probabilities">
+                <ref name="ProbabilityValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anyURI">
+        <data type="anyURI"/>
+    </define>
+    <define name="NaturalNumbersType">
+        <group>
+            <ref name="HREFAttributeGroup"/>
+            <list>
+                <zeroOrMore>
+                    <data type="integer">
+                        <param name="minInclusive">0</param>
+                    </data>
+                </zeroOrMore>
+            </list>
+        </group>
+        <empty/>
+    </define>
+    <define name="anonymous41">
+        <element name="ParetoDistribution">
+            <ref name="anonymous5"/>
+            <element name="scale">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+            <element name="shape">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous42">
+        <element name="GeometricDistribution">
+            <ref name="anonymous5"/>
+            <element name="probability">
+                <ref name="ProbabilityValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous43">
+        <element name="LogNormalDistribution">
+            <ref name="anonymous5"/>
+            <element name="logScale">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="shape">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous44">
+        <element name="Mean">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="HREFAttributeGroup">
+        <optional>
+            <attribute name="mimeType">
+                <ref name="string"/>
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="href">
+                <ref name="anyURI"/>
+            </attribute>
+        </optional>
+    </define>
+    <define name="anonymous45">
+        <element name="Quartile">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <attribute name="level">
+                <data type="double">
+                    <param name="pattern">0.25|0.50|0.75|1.00</param>
+                </data>
+            </attribute>
+        </element>
+    </define>
+    <define name="anonymous46">
+        <element name="StatisticsCollection">
+            <ref name="anonymous10"/>
+            <oneOrMore>
+                <ref name="AbstractSummaryStatistic"/>
+            </oneOrMore>
+        </element>
+    </define>
+    <define name="anonymous47">
+        <element name="Correlation">
+            <ref name="anonymous10"/>
+            <element name="values">
+                <ref name="HREFAttributeGroup"/>
+                <list>
+                    <zeroOrMore>
+                        <data type="double">
+                            <param name="minInclusive">-1.0</param>
+                            <param name="maxInclusive">1.0</param>
+                        </data>
+                    </zeroOrMore>
+                </list>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous48">
+        <element name="GammaDistribution">
+            <ref name="anonymous5"/>
+            <element name="shape">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+            <element name="scale">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="AbstractSummaryStatistic">
+        <choice>
+            <ref name="anonymous50"/>
+            <ref name="anonymous47"/>
+            <ref name="anonymous7"/>
+            <ref name="anonymous38"/>
+            <ref name="anonymous60"/>
+            <ref name="anonymous15"/>
+            <ref name="anonymous31"/>
+            <ref name="anonymous26"/>
+            <ref name="anonymous53"/>
+            <ref name="anonymous40"/>
+            <ref name="anonymous61"/>
+            <ref name="anonymous45"/>
+            <ref name="anonymous24"/>
+            <ref name="anonymous18"/>
+            <ref name="anonymous25"/>
+            <ref name="anonymous36"/>
+            <ref name="anonymous27"/>
+            <ref name="anonymous21"/>
+            <ref name="anonymous14"/>
+            <ref name="anonymous12"/>
+            <ref name="anonymous35"/>
+            <ref name="anonymous34"/>
+            <ref name="anonymous44"/>
+            <ref name="anonymous46"/>
+        </choice>
+    </define>
+    <define name="anonymous49">
+        <element name="BinomialDistribution">
+            <ref name="anonymous5"/>
+            <element name="numberOfTrials">
+                <ref name="NaturalNumbersType"/>
+            </element>
+            <element name="probabilityOfSuccess">
+                <ref name="ProbabilityValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous50">
+        <element name="Probability">
+            <ref name="anonymous10"/>
+            <element name="probabilities">
+                <ref name="ProbabilityValuesType"/>
+            </element>
+            <optional>
+                <attribute name="gt">
+                    <data type="double"/>
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="lt">
+                    <data type="double"/>
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="ge">
+                    <data type="double"/>
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="le">
+                    <data type="double"/>
+                </attribute>
+            </optional>
+        </element>
+    </define>
+    <define name="anonymous51">
+        <empty/>
+    </define>
+    <define name="anonymous52">
+        <element name="BetaDistribution">
+            <ref name="anonymous5"/>
+            <element name="alpha">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+            <element name="beta">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous53">
+        <element name="Quantile">
+            <ref name="anonymous29"/>
+        </element>
+    </define>
+    <define name="anonymous54">
+        <element name="HypergeometricDistribution">
+            <ref name="anonymous5"/>
+            <element name="numberOfSuccesses">
+                <ref name="NaturalNumbersType"/>
+            </element>
+            <element name="numberOfTrials">
+                <ref name="NaturalNumbersType"/>
+            </element>
+            <element name="populationSize">
+                <ref name="NaturalNumbersType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous55">
+        <element name="MultivariateNormalDistribution">
+            <ref name="anonymous5"/>
+            <element name="mean">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="covarianceMatrix">
+                <ref name="CovarianceMatrixType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous56">
+        <element name="InverseGammaDistribution">
+            <ref name="anonymous5"/>
+            <element name="shape">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+            <element name="scale">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous57">
+        <ref name="anonymous51"/>
+        <optional>
+            <choice>
+                <notAllowed/>
+                <element name="samplingMethodDescription">
+                    <data type="string"/>
+                </element>
+            </choice>
+        </optional>
+    </define>
+    <define name="CovarianceMatrixType">
+        <ref name="anonymous28"/>
+        <empty/>
+    </define>
+    <define name="anonymous58">
+        <element name="MultivariateStudentTDistribution">
+            <ref name="anonymous5"/>
+            <element name="mean">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="covarianceMatrix">
+                <ref name="CovarianceMatrixType"/>
+            </element>
+            <element name="degreesOfFreedom">
+                <ref name="PositiveNaturalNumbersType"/>
+            </element>
+        </element>
+    </define>
+    <define name="anonymous59">
+        <element name="NormalDistribution">
+            <ref name="anonymous5"/>
+            <element name="mean">
+                <ref name="ContinuousValuesType"/>
+            </element>
+            <element name="variance">
+                <ref name="PositiveRealValuesType"/>
+            </element>
+        </element>
+    </define>
+    <define name="ProbabilityValuesType">
+        <group>
+            <ref name="HREFAttributeGroup"/>
+            <list>
+                <zeroOrMore>
+                    <data type="double">
+                        <param name="minInclusive">0.0</param>
+                        <param name="maxInclusive">1.0</param>
+                    </data>
+                </zeroOrMore>
+            </list>
+        </group>
+        <empty/>
+    </define>
+    <define name="anonymous60">
+        <element name="CredibleInterval">
+            <ref name="anonymous10"/>
+            <element name="lower">
+                <ref name="QuantileType"/>
+            </element>
+            <element name="upper">
+                <ref name="QuantileType"/>
+            </element>
+        </element>
+    </define>
+    <define name="CategoricalValuesType">
+        <group>
+            <ref name="HREFAttributeGroup"/>
+            <list>
+                <zeroOrMore>
+                    <data type="string"/>
+                </zeroOrMore>
+            </list>
+        </group>
+        <empty/>
+    </define>
+    <define name="anonymous61">
+        <element name="ConfidenceInterval">
+            <ref name="anonymous10"/>
+            <element name="lower">
+                <ref name="QuantileType"/>
+            </element>
+            <element name="upper">
+                <ref name="QuantileType"/>
+            </element>
+        </element>
+    </define>
+</grammar>
