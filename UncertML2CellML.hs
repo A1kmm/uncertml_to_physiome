@@ -7,6 +7,9 @@ import Text.Parsec.Token
 import Text.Parsec.Language
 import Text.XML.HXT.Arrow.ParserInterface
 import Data.Maybe
+import Data.Packed.Matrix
+import Numeric.LinearAlgebra.Algorithms
+import Numeric.Container
 
 data UncertMLDistribution =
   AsSamples [[Double]] |
@@ -482,12 +485,89 @@ unToMMLAST (NormalInverseGammaDistribution mean varScal shape scale) =
       ]
    ]
    
-unToMMLASTPDF x (MultinomialDistribution numTrials (p1:prest)) =
+unToMMLAST (MultinomialDistribution numTrials pvals) =
   let
-    n = M2Cn "dimensionless" numTrials
-    p1 = M2Cn p1
-  (M2Apply M2Eq )
-unToMMLASTPDF x (MultinomialDistribution _ _) = error "Invalid multinomial distribution - need at least one probability."
+    n = M2Cn "dimensionless" (fromIntegral numTrials)
+    recursivelyBuildEquations i nexpr (pval:prest) =
+      let
+        xvar = M2Ci ("out" ++ show i)
+        pexpr = M2Cn "dimensionless" pval
+        massBvar = M2Ci "massBvar"
+      in
+       (M2Apply M2Eq
+          [xvar,
+           M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution")
+           [M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromMass") [
+             M2Lambda "massBvar" $
+               M2Apply M2Times [
+                 M2Apply M2Divide [
+                    M2Apply M2Factorial [nexpr],
+                    M2Apply M2Times [M2Apply M2Factorial [massBvar],
+                                     M2Apply M2Factorial [M2Apply M2Minus [nexpr, massBvar]]]
+                    ],
+                 M2Apply M2Power [pexpr, massBvar],
+                 M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, pexpr],
+                                  M2Apply M2Minus [nexpr, massBvar]]
+                 ]
+             ]
+          ]]):
+       (recursivelyBuildEquations (i + 1) (M2Apply M2Minus [nexpr, xvar]) prest)
+    recursivelyBuildEquations _ _ [] = []
+  in
+    recursivelyBuildEquations 1 n pvals
+
+unToMMLAST (MultivariateNormalDistribution mean cov) = 
+  let
+      n = length mean
+      (_, _, dists') = foldl' addOneDist (mean, cov, []) [1..n]
+      addOneDist (mu:[], (sigma2:[]):[], dists) i = ([], [], (oneNormalDist i (M2Cn "dimensionless" mu) sigma2):dists)
+      addOneDist (mu:remainingMu, ((sigma2val:sigmarow1):sigmarow2plus), dists) i =
+        let
+          sigmaRowP = (1 >< (n - i)) sigmarow1
+          sigmaColumnP = ((n - i) >< 1) (map head sigmarow2plus)
+          sigmaBlock = map (drop 1) sigmarow2plus
+          sigmaBlockP = fromLists sigmaBlock
+          sigmaBlockInv = inv sigmaBlockP
+          sigmaFactorP = sigmaRowP <> sigmaBlockP
+          sigmaFactor = head . toLists $ sigmaFactorP
+          variance = sigma2val - (sigmaFactorP <> sigmaColumnP)@@>(0, 0)
+          mu = M2Apply M2Plus $
+            map (\(sf, muj, j) -> M2Apply M2Times
+                                       [M2Cn "dimensionless" sf,
+                                        M2Apply M2Minus [M2Ci ("outvar" ++ show j), M2Cn "dimensionless" muj]]) $
+               zip3 sigmaFactor remainingMu [(i + 1)..]
+        in
+           (remainingMu, sigmaBlock, (oneNormalDist i mu variance):dists)
+      oneNormalDist i mu sigma2v =
+        let
+          sigma2 = M2Cn "dimensionless" sigma2v
+          x = M2Ci "densityBvar"
+        in
+         M2Apply M2Eq [M2Ci ("outvar" ++ show i),
+                       M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution") [
+                         M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity") [
+                            M2Lambda "densityBvar" $
+                              M2Apply M2Times [
+                                M2Apply M2Divide [M2Cn "dimensionless" 1,
+                                                  M2Apply (M2Root Nothing) [
+                                                    M2Apply M2Times [M2Cn "dimensionless" 2,
+                                                                     M2Pi, sigma2]]
+                                                 ],
+                                M2Apply M2Exp [M2Apply M2Minus [
+                                                  M2Apply M2Divide [
+                                                     M2Apply M2Power [M2Apply M2Minus [x, mu], M2Cn "dimensionless" 2],
+                                                     M2Apply M2Times [M2Cn "dimensionless" 2, sigma2]
+                                                     ]
+                                                  ]
+                                              ]
+                                ]
+                            ]
+                         ]
+                       ]
+  in
+   dists'
+
+unToMMLAST (MultivariateStudentTDistribution mean cov degf) = error "Multivariate student-T distribution not yet supported"
 
 unToMMLAST v = [M2Apply M2Eq [M2Ci "outvar",
                               M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution")

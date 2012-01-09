@@ -8,4 +8,5 @@ Executable uncertml2cellml
   Build-Depends:
     base >= 2,
     hxt >= 9.1,
-    parsec >= 3
+    parsec >= 3,
+    hmatrix >= 0.13
