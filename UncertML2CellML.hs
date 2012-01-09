@@ -1,6 +1,6 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 import Control.Monad
-import Text.XML.HXT.Core
+import Text.XML.HXT.Core hiding(trace)
 import Data.List
 import Text.Parsec
 import Text.Parsec.Token
@@ -87,11 +87,12 @@ rightOrFail _ (Right v) = v
 parseCombinedChildText :: ArrowXml a => Parsec String () o -> a XmlTree o
 parseCombinedChildText p = combinedChildText >>^ (\v -> rightOrFail "Parsing text node: " (parse p "XML text node" v))
 
-uncertmlFloat = naturalOrFloat haskell >>=
-              (\v ->
-                case v of
-                  Left n -> return $ fromIntegral n
-                  Right f -> return f)
+uncertmlFloat = do
+  uncertmlWhitespace
+  v <- naturalOrFloat haskell
+  case v of
+       Left n -> return $ fromIntegral n
+       Right f -> return f
 uncertmlWhitespace = many (oneOf " \t\r\n")
 uncertmlList a = sepBy a uncertmlWhitespace
 uncertmlListOfFloat = uncertmlList uncertmlFloat
@@ -537,7 +538,8 @@ unToMMLAST (MultivariateNormalDistribution mean cov) =
                                         M2Apply M2Minus [M2Ci ("outvar" ++ show j), M2Cn "dimensionless" muj]]) $
                zip3 sigmaFactor remainingMu [(i + 1)..]
         in
-           (remainingMu, sigmaBlock, (oneNormalDist i mu variance):dists)
+          (remainingMu, sigmaBlock, (oneNormalDist i mu variance):dists)
+      addOneDist (mu, sigma, dists) i = (mu, sigma, dists)
       oneNormalDist i mu sigma2v =
         let
           sigma2 = M2Cn "dimensionless" sigma2v
