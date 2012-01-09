@@ -83,9 +83,8 @@ mathml2OpToXML M2Power = [mkqelem (mkNsName "mml:power" mathmlNS) [] []]
 mathml2OpToXML M2Rem = [mkqelem (mkNsName "mml:rem" mathmlNS) [] []]
 mathml2OpToXML M2Times = [mkqelem (mkNsName "mml:times" mathmlNS) [] []]
 mathml2OpToXML (M2Root { m2rootDegree = mex }) =
-  [mkqelem (mkNsName "mml:root" mathmlNS) [] [],
-   mkqelem (mkNsName "mml:degree" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $
-                                                    maybeToList mex)]
+  catMaybes $ [Just $ mkqelem (mkNsName "mml:root" mathmlNS) [] [],
+               liftM (\a -> mkqelem (mkNsName "mml:degree" mathmlNS) [] [mathml2ToXML a]) mex]
 mathml2OpToXML M2Gcd = [mkqelem (mkNsName "mml:gcd" mathmlNS) [] []]
 mathml2OpToXML M2And = [mkqelem (mkNsName "mml:and" mathmlNS) [] []]
 mathml2OpToXML M2Or = [mkqelem (mkNsName "mml:or" mathmlNS) [] []]
@@ -105,13 +104,13 @@ mathml2OpToXML M2Leq = [mkqelem (mkNsName "mml:leq" mathmlNS) [] []]
 mathml2OpToXML M2Factorof = [mkqelem (mkNsName "mml:factorof" mathmlNS) [] []]
 mathml2OpToXML (M2Int { m2intLowlimit = mll, m2intUplimit = mul, m2intDegree = mid,
                         m2intBvar = ib } ) =
-  [mkqelem (mkNsName "mml:int" mathmlNS) [] [],
-   mkqelem (mkNsName "mml:lowlimit" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mll),
-   mkqelem (mkNsName "mml:uplimit" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mul),
-   mkqelem (mkNsName "mml:degree" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mid),
-   mkqelem (mkNsName "mml:bvar" mathmlNS)
-     [] [mkqelem (mkNsName "mml:ci" mathmlNS) [] [txt ib]]
-   ]
+  catMaybes [Just $ mkqelem (mkNsName "mml:int" mathmlNS) [] [],
+             liftM (\ex -> mkqelem (mkNsName "mml:lowlimit" mathmlNS) [] [mathml2ToXML ex]) mll,
+             liftM (\ex -> mkqelem (mkNsName "mml:uplimit" mathmlNS) [] [mathml2ToXML ex]) mul,
+             liftM (\ex -> mkqelem (mkNsName "mml:degree" mathmlNS) [] [mathml2ToXML ex]) mid,
+             Just $ mkqelem (mkNsName "mml:bvar" mathmlNS)
+                     [] [mkqelem (mkNsName "mml:ci" mathmlNS) [] [txt ib]]
+            ]
 mathml2OpToXML (M2Diff { m2diffBvar = db }) =
   [mkqelem (mkNsName "mml:diff" mathmlNS) [] [],
    mkqelem (mkNsName "mml:bvar" mathmlNS)
@@ -121,16 +120,49 @@ mathml2OpToXML (M2Diff { m2diffBvar = db }) =
 mathml2OpToXML M2Exp = [mkqelem (mkNsName "mml:exp" mathmlNS) [] []]
 mathml2OpToXML M2Ln = [mkqelem (mkNsName "mml:ln" mathmlNS) [] []]
 mathml2OpToXML (M2Log { m2logLogbase = mlb }) =
-  [mkqelem (mkNsName "mml:log" mathmlNS) [] [],
-   mkqelem (mkNsName "mml:logbase" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mlb)]
+  catMaybes $ [Just $ mkqelem (mkNsName "mml:log" mathmlNS) [] [],
+               liftM (\ex -> mkqelem (mkNsName "mml:logbase" mathmlNS) [] [mathml2ToXML ex]) mlb
+              ]
 mathml2OpToXML (M2Csymbol cs) = [mkqelem (mkNsName "mml:csymbol" mathmlNS) [sattr "definitionURL" cs] []]
+
+mathmlFloat = do
+  mathmlWhitespace
+  v <- naturalOrFloat haskell
+  case v of
+       Left n -> return $ fromIntegral n
+       Right f -> return f
+mathmlWhitespace = many (oneOf " \t\r\n")
 
 xmlToMathML2 :: ArrowXml a => a XmlTree MathML2Expression
 xmlToMathML2 =
   (hasQName (mkNsName "mml:apply" mathmlNS) >>>
-   liftArrow2 M2Apply (getChildren >>> xmlToM2Op)
-                      (listA $ listA (getChildren >>> isElem) >>> tail ^>> unlistA >>> xmlToMathML2))
-  
+   liftArrow2 M2Apply (xmlToM2Op)
+                      (listA $ listA (getChildren >>> isElem) >>> tail ^>> unlistA >>> xmlToMathML2)) <+>
+  (hasQName (mkNsName "mml:ci" mathmlNS) >>> liftArrow M2Ci combinedChildText) <+>
+  (hasQName (mkNsName "mml:cn" mathmlNS) >>>
+   liftArrow2 M2Cn (getQAttrValue (mkNsName "cellml:units" cellmlNS))
+                   (parseCombinedChildText mathmlFloat)) <+>
+  (liftArrow2 M2Lambda (getChildren >>> hasQName (mkNsName "mml:bvar" mathmlNS) 
+                                    /> hasQName (mkNsName "mml:ci" mathmlNS)
+                                    >>> combinedChildText)
+                       (getChildren >>> xmlToMathML2)) <+>
+  (liftArrow M2Vector (listA $ getChildren >>> xmlToMathML2)) <+>
+  xml2M2Constant "true" M2True <+>
+  xml2M2Constant "false" M2False <+>
+  xml2M2Constant "infinity" M2Infinity <+>
+  xml2M2Constant "pi" M2Pi <+>
+  xml2M2Constant "eulergamma" M2EulerGamma <+>
+  xml2M2Constant "exponentiale" M2ExponentialE <+>
+  (hasQName (mkNsName "mml:piecewise" mathmlNS) >>>
+   liftArrow2 M2Piecewise
+      (listA $ getChildren >>> hasQName (mkNsName "mml:piece" mathmlNS) >>>
+               listA (getChildren >>> xmlToMathML2) >>?
+               (\v -> liftM2 (,) (v!!?0) (v!!?1)))
+      (maybeA $ getChildren >>> hasQName (mkNsName "mml:otherwise" mathmlNS) />
+                xmlToMathML2))
+
+xml2M2Constant n c = ((getChildren >>> hasQName (mkNsName ("mml:" ++ n) mathmlNS)) `guards` (arr $ const c))
+
 xmlToM2Op = m2SimpleOp "quotient" M2Quotient <+>
             m2SimpleOp "factorial" M2Factorial <+>
             m2SimpleOp "divide" M2Divide <+>
@@ -159,6 +191,23 @@ xmlToM2Op = m2SimpleOp "quotient" M2Quotient <+>
             m2SimpleOp "leq" M2Leq <+>
             m2SimpleOp "factorof" M2Factorof <+>
             m2SimpleOp "exp" M2Exp <+>
-            m2SimpleOp "ln" M2Ln
+            m2SimpleOp "ln" M2Ln <+>
+            ((getChildren >>> hasQName (mkNsName "mml:root" mathmlNS)) `guards`
+              liftArrow M2Root (m2MaybeExpression "degree")) <+>
+            ((getChildren >>> hasQName (mkNsName "mml:int" mathmlNS)) `guards`
+              (liftArrow4 M2Int
+                 (m2MaybeExpression "lowlimit")
+                 (m2MaybeExpression "uplimit")
+                 (m2MaybeExpression "degree")
+                 m2BvarChild
+              )) <+>
+            ((getChildren >>> hasQName (mkNsName "mml:diff" mathmlNS)) `guards`
+              (liftArrow M2Diff m2BvarChild)) <+>
+            ((getChildren >>> hasQName (mkNsName "mml:log" mathmlNS)) `guards`
+              (liftArrow M2Log
+                 (m2MaybeExpression "logbase")
+              ))
 
-m2SimpleOp n c = hasQName (mkNsName ("mml:" ++ n) mathmlNS) >>^ const c
+m2MaybeExpression n = (maybeA (getChildren >>> hasQName (mkNsName ("mml:" ++ n) mathmlNS) /> xmlToMathML2))
+m2SimpleOp n c = getChildren >>> (hasQName (mkNsName ("mml:" ++ n) mathmlNS) >>^ const c)
+m2BvarChild = getChildren >>> hasQName (mkNsName "mml:bvar" mathmlNS) /> hasQName (mkNsName "mml:ci" mathmlNS) >>> combinedChildText
