@@ -1,5 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
-module MathML (MathML2Expression(..), MathML2Op(..), m2ToXML, mathml2ToXML, mathmlNS, cellmlNS)
+module MathML (MathML2Expression(..), MathML2Op(..), m2ToXML, mathml2ToXML, mathmlNS, cellmlNS, xmlToMathML2)
 where
 
 import Control.Monad
@@ -124,3 +124,41 @@ mathml2OpToXML (M2Log { m2logLogbase = mlb }) =
   [mkqelem (mkNsName "mml:log" mathmlNS) [] [],
    mkqelem (mkNsName "mml:logbase" mathmlNS) [] (map (\ex -> mathml2ToXML ex) $ maybeToList mlb)]
 mathml2OpToXML (M2Csymbol cs) = [mkqelem (mkNsName "mml:csymbol" mathmlNS) [sattr "definitionURL" cs] []]
+
+xmlToMathML2 :: ArrowXml a => a XmlTree MathML2Expression
+xmlToMathML2 =
+  (hasQName (mkNsName "mml:apply" mathmlNS) >>>
+   liftArrow2 M2Apply (getChildren >>> xmlToM2Op)
+                      (listA $ listA (getChildren >>> isElem) >>> tail ^>> unlistA >>> xmlToMathML2))
+  
+xmlToM2Op = m2SimpleOp "quotient" M2Quotient <+>
+            m2SimpleOp "factorial" M2Factorial <+>
+            m2SimpleOp "divide" M2Divide <+>
+            m2SimpleOp "max" M2Max <+>
+            m2SimpleOp "min" M2Min <+>
+            m2SimpleOp "minus" M2Minus <+>
+            m2SimpleOp "plus" M2Plus <+>
+            m2SimpleOp "power" M2Power <+>
+            m2SimpleOp "rem" M2Rem <+>
+            m2SimpleOp "times" M2Times <+>
+            m2SimpleOp "gcd" M2Gcd <+>
+            m2SimpleOp "and" M2And <+>
+            m2SimpleOp "or" M2Or <+>
+            m2SimpleOp "xor" M2Xor <+>
+            m2SimpleOp "not" M2Not <+>
+            m2SimpleOp "implies" M2Implies <+>
+            m2SimpleOp "abs" M2Abs <+>
+            m2SimpleOp "lcm" M2Lcm <+>
+            m2SimpleOp "floor" M2Floor <+>
+            m2SimpleOp "ceiling" M2Ceiling <+>
+            m2SimpleOp "eq" M2Eq <+>
+            m2SimpleOp "neq" M2Neq <+>
+            m2SimpleOp "gt" M2Gt <+>
+            m2SimpleOp "lt" M2Lt <+>
+            m2SimpleOp "geq" M2Geq <+>
+            m2SimpleOp "leq" M2Leq <+>
+            m2SimpleOp "factorof" M2Factorof <+>
+            m2SimpleOp "exp" M2Exp <+>
+            m2SimpleOp "ln" M2Ln
+
+m2SimpleOp n c = hasQName (mkNsName ("mml:" ++ n) mathmlNS) >>^ const c

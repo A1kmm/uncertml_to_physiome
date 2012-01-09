@@ -1,4 +1,3 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
 import Control.Monad
 import Text.XML.HXT.Core
 import Data.List
@@ -150,7 +149,7 @@ unToMMLAST (NormalInverseGammaDistribution mean varScal shape scale) =
          ]
       ]
    ]
-   
+
 unToMMLAST (MultinomialDistribution numTrials pvals) =
   let
     n = M2Cn "dimensionless" (fromIntegral numTrials)
