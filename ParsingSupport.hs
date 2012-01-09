@@ -3,6 +3,8 @@ where
 
 import Text.XML.HXT.Core
 import Text.Parsec
+import Data.Maybe
+import qualified Data.Foldable
 
 liftArrow :: Arrow a => (c -> d) -> a b c -> a b d
 liftArrow = flip (>>^)
@@ -14,6 +16,14 @@ liftArrow4 :: Arrow a => (c -> c' -> c'' -> c''' -> d) -> a b c -> a b c' -> a b
 liftArrow4 f a1 a2 a3 a4 = arr (\a -> (a, (a, (a, a)))) >>> (a1 *** a2 *** a3 *** a4) >>> arr (\(a, (b, (c, d))) -> f a b c d)
 liftArrow5 :: Arrow a => (c -> c' -> c'' -> c''' -> c'''' -> d) -> a b c -> a b c' -> a b c'' -> a b c''' -> a b c'''' -> a b d
 liftArrow5 f a1 a2 a3 a4 a5 = arr (\a -> (a, (a, (a, (a, a))))) >>> (a1 *** a2 *** a3 *** a4 *** a5) >>> arr (\(a, (b, (c, (d, e)))) -> f a b c d e)
+
+maybeA :: ArrowList a => a b c -> a b (Maybe c)
+maybeA a = listToMaybe ^<< listA a
+
+arrMaybe :: ArrowList a => (b -> Maybe c) -> a b c
+arrMaybe f = arrL (maybeToList . f)
+
+a >>? b = a >>> arrMaybe b
 
 combinedChildText :: ArrowXml a => a XmlTree String
 combinedChildText = getChildren >>> getText >. concat
@@ -33,3 +43,8 @@ chunkList dim l = let
   in
      h:(chunkList dim t)
 
+(!!?) :: Data.Foldable.Foldable f => f a -> Int -> Maybe a
+f !!? i = either Just (const Nothing) $
+            Data.Foldable.foldl (\a v -> a >>=
+                                         \idx -> if idx == 0 then Left v else Right (idx - 1))
+                                 (Right i) f
