@@ -1,5 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
-module MathML (MathML2Expression(..), MathML2Op(..), m2ToXML, mathml2ToXML, mathmlNS, cellmlNS, xmlToMathML2)
+module MathML (MathML2Expression(..), MathML2Op(..), m2ToXML, mathml2ToXML, mathmlNS, cellmlNS, xmlToMathML2, m2TryEval)
 where
 
 import Control.Monad
@@ -211,3 +211,83 @@ xmlToM2Op = m2SimpleOp "quotient" M2Quotient <+>
 m2MaybeExpression n = (maybeA (getChildren >>> hasQName (mkNsName ("mml:" ++ n) mathmlNS) /> xmlToMathML2))
 m2SimpleOp n c = getChildren >>> (hasQName (mkNsName ("mml:" ++ n) mathmlNS) >>^ const c)
 m2BvarChild = getChildren >>> hasQName (mkNsName "mml:bvar" mathmlNS) /> hasQName (mkNsName "mml:ci" mathmlNS) >>> combinedChildText
+
+m2TryEval :: MathML2Expression -> Maybe Double
+m2TryEval (M2Apply M2Quotient [ea, eb]) = do
+  a <- m2TryEval ea
+  b <- m2TryEval eb
+  return $ fromIntegral $ (floor a) `div` (floor b)
+m2TryEval (M2Apply M2Factorial [ea]) = do
+  a <- m2TryEval ea
+  let f x | x <= 0 = 1
+          | otherwise = x * f (x - 1)
+  return $ fromIntegral . f. floor $ a
+m2TryEval (M2Apply M2Divide [ea, eb]) =
+  liftM2 (/) (m2TryEval ea) (m2TryEval eb)
+m2TryEval (M2Apply M2Max l) =
+  liftM maximum (sequence (map m2TryEval l))
+m2TryEval (M2Apply M2Min l) =
+  liftM minimum (sequence (map m2TryEval l))
+m2TryEval (M2Apply M2Minus [ea]) = liftM (0-) (m2TryEval ea)
+m2TryEval (M2Apply M2Minus [ea, eb]) = liftM2 (-) (m2TryEval ea) (m2TryEval eb)
+m2TryEval (M2Apply M2Plus l) = liftM sum (sequence (map m2TryEval l))
+m2TryEval (M2Apply M2Power [ea, eb]) = liftM2 (**) (m2TryEval ea) (m2TryEval eb)
+m2TryEval (M2Apply M2Rem [ea, eb]) = do
+  a <- m2TryEval ea
+  b <- m2TryEval eb
+  return $ fromIntegral $ (floor a) `rem` (floor b)
+m2TryEval (M2Apply M2Times l) = liftM product (sequence (map m2TryEval l))
+m2TryEval (M2Apply (M2Root mdeg) [ea]) =
+  liftM2 (**) (m2TryEval ea) (liftM (1/) (maybe (Just 2) m2TryEval mdeg))
+
+-- To do: Implement m2TryEval (M2Apply M2Gcd [ea, eb]) =
+-- To do: Implement m2TryEval (M2Apply M2Lcm [ea, eb]) =
+m2TryEval (M2Apply M2And l) =
+  liftM (fromIntegral . fromEnum . and . map (/=0)) (sequence . map m2TryEval $ l)
+m2TryEval (M2Apply M2Or l) =
+  liftM (fromIntegral . fromEnum . or . map (/=0)) (sequence . map m2TryEval $ l)
+m2TryEval (M2Apply M2Xor l) =
+  let
+    a `xor` b = (a && not b) || (not a && b)
+  in
+   liftM (fromIntegral . fromEnum . or . map (/=0)) (sequence . map m2TryEval $ l)
+m2TryEval (M2Apply M2Not [ea]) =
+  liftM (fromIntegral . fromEnum . not . (/=0)) (m2TryEval ea)
+m2TryEval (M2Apply M2Implies [ea, eb]) = do
+  a <- liftM (/=0) $ m2TryEval ea
+  b <- liftM (/=0) $ m2TryEval eb
+  return . fromIntegral . fromEnum $ not a || (a && b)
+m2TryEval (M2Apply M2Abs [ea]) = liftM abs (m2TryEval ea)
+m2TryEval (M2Apply M2Floor [ea]) = liftM (fromIntegral . floor) (m2TryEval ea)
+m2TryEval (M2Apply M2Ceiling [ea]) = liftM (fromIntegral . ceiling) (m2TryEval ea)
+m2TryEval (M2Apply M2Eq [ea, eb]) = fmap (fromIntegral . fromEnum) $ liftM2 (==) (m2TryEval ea) (m2TryEval eb)
+m2TryEval (M2Apply M2Neq [ea, eb]) = fmap (fromIntegral . fromEnum) $ liftM2 (/=) (m2TryEval ea) (m2TryEval eb)
+m2TryEval (M2Apply M2Gt [ea, eb]) = fmap (fromIntegral . fromEnum) $ liftM2 (>) (m2TryEval ea) (m2TryEval eb)
+m2TryEval (M2Apply M2Lt [ea, eb]) = fmap (fromIntegral . fromEnum) $ liftM2 (<) (m2TryEval ea) (m2TryEval eb)
+m2TryEval (M2Apply M2Leq [ea, eb]) = fmap (fromIntegral . fromEnum) $ liftM2 (<=) (m2TryEval ea) (m2TryEval eb)
+m2TryEval (M2Apply M2Geq [ea, eb]) = fmap (fromIntegral . fromEnum) $ liftM2 (>=) (m2TryEval ea) (m2TryEval eb)
+m2TryEval (M2Apply M2Factorof [ea, eb]) = do
+  a <- m2TryEval ea
+  b <- m2TryEval eb
+  return . fromIntegral . fromEnum $ (floor b) `rem` (floor a) == 0
+-- To do: Definite integrals: m2TryEval (M2Apply M2Int ...)
+m2TryEval (M2Apply M2Exp [ea]) = liftM exp (m2TryEval ea)
+m2TryEval (M2Apply M2Ln [ea]) = liftM log (m2TryEval ea)
+m2TryEval (M2Apply (M2Log mlb) [ea]) =
+  liftM2 logBase (maybe (Just 10) m2TryEval mlb) (m2TryEval ea)
+
+m2TryEval (M2Cn _ v) = Just v
+m2TryEval M2True = Just 1
+m2TryEval M2False = Just 0
+m2TryEval M2Infinity = Nothing
+m2TryEval M2Pi = Just pi
+m2TryEval M2EulerGamma = Just 0.57721566490153286060651209008240243104215933593992
+m2TryEval M2ExponentialE = Just (exp 1)
+m2TryEval (M2Piecewise pw ow) = 
+  (listToMaybe . flip mapMaybe pw $ \(mvalue, mcond) ->
+    case m2TryEval mcond 
+      of
+        Just v | v /= 0 -> m2TryEval mvalue
+        _ -> Nothing
+  ) `mplus` (ow >>= m2TryEval)
+m2TryEval _ = Nothing
