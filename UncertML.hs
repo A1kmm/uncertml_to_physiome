@@ -1,5 +1,6 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
-module UncertML (UncertMLDistribution(..), xmlToUncertMLDistribution)
+module UncertML (UncertMLDistribution(..), xmlToUncertMLDistribution,
+                 uncertmlASTToXML, unToXML)
 where
 
 import Control.Monad
@@ -76,138 +77,291 @@ uncertmlListOfFloat = uncertmlList uncertmlFloat
 
 xmlToUncertMLDistribution :: ArrowXml a => a XmlTree UncertMLDistribution
 xmlToUncertMLDistribution =
-  (hasQName (mkNsName "un:RandomSample" uncertmlNS) >>>
-   liftArrow AsSamples (listA $ getChildren >>> hasQName (mkNsName "un:Realisation" uncertmlNS) />
-                                hasQName (mkNsName "un:values" uncertmlNS) >>> parseCombinedChildText uncertmlListOfFloat)) <+>
-  (hasQName (mkNsName "un:DirichletDistribution" uncertmlNS) >>>
-   liftArrow DirichletDistribution (getChildren >>> hasQName (mkNsName "un:concentration" uncertmlNS) >>> parseCombinedChildText uncertmlListOfFloat)) <+>
-  (hasQName (mkNsName "un:ExponentialDistribution" uncertmlNS) >>>
-   liftArrow ExponentialDistribution (getChildren >>> hasQName (mkNsName "un:rate" uncertmlNS) >>> readCombinedChildText)) <+>
-  (hasQName (mkNsName "un:GammaDistribution" uncertmlNS) >>>
-   liftArrow2 GammaDistribution (getChildren >>> hasQName (mkNsName "un:shape" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:scale" uncertmlNS) >>> readCombinedChildText)
+  (hasQName (uelName "RandomSample") >>>
+   liftArrow AsSamples (listA $ getChildren >>> hasQName (uelName "Realisation") />
+                                hasQName (uelName "values") >>> parseCombinedChildText uncertmlListOfFloat)) <+>
+  (hasQName (uelName "DirichletDistribution") >>>
+   liftArrow DirichletDistribution (getChildren >>> hasQName (uelName "concentration") >>> parseCombinedChildText uncertmlListOfFloat)) <+>
+  (hasQName (uelName "ExponentialDistribution") >>>
+   liftArrow ExponentialDistribution (getChildren >>> hasQName (uelName "rate") >>> readCombinedChildText)) <+>
+  (hasQName (uelName "GammaDistribution") >>>
+   liftArrow2 GammaDistribution (getChildren >>> hasQName (uelName "shape") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:InverseGammaDistribution" uncertmlNS) >>>
-   liftArrow2 InverseGammaDistribution (getChildren >>> hasQName (mkNsName "un:shape" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:scale" uncertmlNS) >>> readCombinedChildText)
+  (hasQName (uelName "InverseGammaDistribution") >>>
+   liftArrow2 InverseGammaDistribution (getChildren >>> hasQName (uelName "shape") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:NormalInverseGammaDistribution" uncertmlNS) >>>
+  (hasQName (uelName "NormalInverseGammaDistribution") >>>
    liftArrow4 NormalInverseGammaDistribution 
-     (getChildren >>> hasQName (mkNsName "un:mean" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:varianceScaling" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:shape" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:scale" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "mean") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "varianceScaling") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "shape") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:PoissonDistribution" uncertmlNS) >>>
-   liftArrow PoissonDistribution (getChildren >>> hasQName (mkNsName "un:rate" uncertmlNS) >>> readCombinedChildText)) <+>
-  (hasQName (mkNsName "un:NormalDistribution" uncertmlNS) >>>
+  (hasQName (uelName "PoissonDistribution") >>>
+   liftArrow PoissonDistribution (getChildren >>> hasQName (uelName "rate") >>> readCombinedChildText)) <+>
+  (hasQName (uelName "NormalDistribution") >>>
    liftArrow2 NormalDistribution
-     (getChildren >>> hasQName (mkNsName "un:mean" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:variance" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "mean") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "variance") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:BinomialDistribution" uncertmlNS) >>>
+  (hasQName (uelName "BinomialDistribution") >>>
    liftArrow2 BinomialDistribution
-     (getChildren >>> hasQName (mkNsName "un:numberOfTrials" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:probabilityOfSuccess" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "numberOfTrials") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "probabilityOfSuccess") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:MultinomialDistribution" uncertmlNS) >>>
+  (hasQName (uelName "MultinomialDistribution") >>>
    liftArrow2 MultinomialDistribution
-     (getChildren >>> hasQName (mkNsName "un:numberOfTrials" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:probabilities" uncertmlNS) >>> parseCombinedChildText uncertmlListOfFloat)
+     (getChildren >>> hasQName (uelName "numberOfTrials") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "probabilities") >>> parseCombinedChildText uncertmlListOfFloat)
   ) <+>
-  (hasQName (mkNsName "un:LogNormalDistribution" uncertmlNS) >>>
+  (hasQName (uelName "LogNormalDistribution") >>>
    liftArrow2 LogNormalDistribution
-     (getChildren >>> hasQName (mkNsName "un:logScale" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:shape" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "logScale") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "shape") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:StudentTDistribution" uncertmlNS) >>>
+  (hasQName (uelName "StudentTDistribution") >>>
    liftArrow3 StudentTDistribution
-     (getChildren >>> hasQName (mkNsName "un:location" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:scale" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:degreesOfFreedom" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "location") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "degreesOfFreedom") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:UniformDistribution" uncertmlNS) >>>
+  (hasQName (uelName "UniformDistribution") >>>
    liftArrow2 UniformDistribution
-     (getChildren >>> hasQName (mkNsName "un:minimum" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:maximum" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "minimum") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "maximum") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:MixtureModel" uncertmlNS) >>>
+  (hasQName (uelName "MixtureModel") >>>
    liftArrow MixtureModel
-     (listA (getChildren >>> hasQName (mkNsName "un:component" uncertmlNS) >>> ((getAttrValue "weight" >>^ read) &&& (getChildren >>> xmlToUncertMLDistribution))))
+     (listA (getChildren >>> hasQName (uelName "component") >>> ((getAttrValue "weight" >>^ read) &&& (getChildren >>> xmlToUncertMLDistribution))))
   ) <+>
-  (hasQName (mkNsName "un:MultivariateNormalDistribution" uncertmlNS) >>>
+  (hasQName (uelName "MultivariateNormalDistribution") >>>
    liftArrow2 MultivariateNormalDistribution
-     (getChildren >>> hasQName (mkNsName "un:mean" uncertmlNS) >>> parseCombinedChildText uncertmlListOfFloat)
+     (getChildren >>> hasQName (uelName "mean") >>> parseCombinedChildText uncertmlListOfFloat)
      (getChildren >>> readCovarianceMatrix)
   ) <+>
-  (hasQName (mkNsName "un:MultivariateStudentTDistribution" uncertmlNS) >>>
+  (hasQName (uelName "MultivariateStudentTDistribution") >>>
    liftArrow3 MultivariateStudentTDistribution
-     (getChildren >>> hasQName (mkNsName "un:mean" uncertmlNS) >>> parseCombinedChildText uncertmlListOfFloat)
+     (getChildren >>> hasQName (uelName "mean") >>> parseCombinedChildText uncertmlListOfFloat)
      (getChildren >>> readCovarianceMatrix)
-     (getChildren >>> hasQName (mkNsName "un:degreesOfFreedom" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "degreesOfFreedom") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:BetaDistribution" uncertmlNS) >>>
+  (hasQName (uelName "BetaDistribution") >>>
    liftArrow2 BetaDistribution
-     (getChildren >>> hasQName (mkNsName "un:alpha" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:beta" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "alpha") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "beta") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:LaplaceDistribution" uncertmlNS) >>>
+  (hasQName (uelName "LaplaceDistribution") >>>
    liftArrow2 LaplaceDistribution
-     (getChildren >>> hasQName (mkNsName "un:location" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:scale" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "location") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:CauchyDistribution" uncertmlNS) >>>
+  (hasQName (uelName "CauchyDistribution") >>>
    liftArrow2 CauchyDistribution
-     (getChildren >>> hasQName (mkNsName "un:location" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:scale" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "location") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:WeibullDistribution" uncertmlNS) >>>
+  (hasQName (uelName "WeibullDistribution") >>>
    liftArrow2 WeibullDistribution
-     (getChildren >>> hasQName (mkNsName "un:scale" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:shape" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "shape") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:LogisticDistribution" uncertmlNS) >>>
+  (hasQName (uelName "LogisticDistribution") >>>
    liftArrow2 LogisticDistribution
-     (getChildren >>> hasQName (mkNsName "un:location" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:scale" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "location") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:ChiSquareDistribution" uncertmlNS) >>>
-   liftArrow ChiSquareDistribution (getChildren >>> hasQName (mkNsName "un:degreesOfFreedom" uncertmlNS) >>> readCombinedChildText)
+  (hasQName (uelName "ChiSquareDistribution") >>>
+   liftArrow ChiSquareDistribution (getChildren >>> hasQName (uelName "degreesOfFreedom") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:GeometricDistribution" uncertmlNS) >>>
-   liftArrow GeometricDistribution (getChildren >>> hasQName (mkNsName "un:probability" uncertmlNS) >>> readCombinedChildText)
+  (hasQName (uelName "GeometricDistribution") >>>
+   liftArrow GeometricDistribution (getChildren >>> hasQName (uelName "probability") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:HypergeometricDistribution" uncertmlNS) >>>
+  (hasQName (uelName "HypergeometricDistribution") >>>
    liftArrow3 HypergeometricDistribution
-     (getChildren >>> hasQName (mkNsName "un:numberOfSuccesses" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:numberOfTrials" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:populationSize" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "numberOfSuccesses") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "numberOfTrials") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "populationSize") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:FDistribution" uncertmlNS) >>>
+  (hasQName (uelName "FDistribution") >>>
    liftArrow2 FDistribution
-     (getChildren >>> hasQName (mkNsName "un:denominator" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:numerator" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "denominator") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "numerator") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:NegativeBinomialDistribution" uncertmlNS) >>>
+  (hasQName (uelName "NegativeBinomialDistribution") >>>
    liftArrow2 NegativeBinomialDistribution
-     (getChildren >>> hasQName (mkNsName "un:numberOfFailures" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:probability" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "numberOfFailures") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "probability") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:ParetoDistribution" uncertmlNS) >>>
+  (hasQName (uelName "ParetoDistribution") >>>
    liftArrow2 ParetoDistribution
-     (getChildren >>> hasQName (mkNsName "un:scale" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:slope" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "slope") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:WishartDistribution" uncertmlNS) >>>
+  (hasQName (uelName "WishartDistribution") >>>
    liftArrow2 WishartDistribution
-     (getChildren >>> hasQName (mkNsName "un:degreesOfFreedom" uncertmlNS) >>> readCombinedChildText)
-     (getChildren >>> hasQName (mkNsName "un:scaleMatrix" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "degreesOfFreedom") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "scaleMatrix") >>> readCombinedChildText)
   ) <+>
-  (hasQName (mkNsName "un:BernoulliDistribution" uncertmlNS) >>>
+  (hasQName (uelName "BernoulliDistribution") >>>
    liftArrow BernoulliDistribution
-     (getChildren >>> hasQName (mkNsName "un:probabilities" uncertmlNS) >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "probabilities") >>> readCombinedChildText)
   )
 
-readCovarianceMatrix = hasQName (mkNsName "un:covarianceMatrix" uncertmlNS) >>>
-                       liftArrow2 chunkList (getAttrValue "dimension" >>^ read) (getChildren >>> hasQName (mkNsName "un:values" uncertmlNS) >>>
+readCovarianceMatrix = hasQName (uelName "covarianceMatrix") >>>
+                       liftArrow2 chunkList (getAttrValue "dimension" >>^ read) (getChildren >>> hasQName (uelName "values") >>>
                                                                                  parseCombinedChildText uncertmlListOfFloat)
+
+uelName n = mkNsName ("un:" ++ n) uncertmlNS
+
+makeUncertMLList n v = mkqelem (uelName n) [] [txt . intercalate " " $ map show v]
+makeUncertMLNamedShow n v = mkqelem (uelName n) [] [txt $ show v]
+
+unToXML = (\v -> (uncertmlASTToXML v, v)) ^>> app
+
+uncertmlASTToXML (AsSamples s) =
+  mkqelem (uelName "RandomSample") []
+    (map (\rls -> mkqelem (uelName "Realisation") [] [makeUncertMLList "values" rls]) s)
+uncertmlASTToXML (DirichletDistribution dirconc) =
+  mkqelem (uelName "DirichletDistribution") [] [
+      makeUncertMLNamedShow "concentration" dirconc
+    ]
+uncertmlASTToXML (ExponentialDistribution exprate) =
+  mkqelem (uelName "ExponentialDistribution") [] [
+      makeUncertMLNamedShow "rate" exprate
+    ]
+uncertmlASTToXML (GammaDistribution shape scale) =
+  mkqelem (uelName "GammaDistribution") [] [
+      makeUncertMLNamedShow "shape" shape,
+      makeUncertMLNamedShow "scale" scale
+    ]
+uncertmlASTToXML (InverseGammaDistribution shape scale) =
+  mkqelem (uelName "InverseGammaDistribution") [] [
+      makeUncertMLNamedShow "shape" shape,
+      makeUncertMLNamedShow "scale" scale
+    ]
+uncertmlASTToXML (NormalInverseGammaDistribution mean varscal shape scale) =
+  mkqelem (uelName "NormalInverseGammaDistribution") [] [
+      makeUncertMLNamedShow "mean" mean,
+      makeUncertMLNamedShow "varianceScaling" varscal,
+      makeUncertMLNamedShow "shape" shape,
+      makeUncertMLNamedShow "scale" scale
+    ]
+uncertmlASTToXML (PoissonDistribution rate) =
+  mkqelem (uelName "PoissonDistribution") [] [
+      makeUncertMLNamedShow "rate" rate
+    ]
+uncertmlASTToXML (NormalDistribution mean var) =
+  mkqelem (uelName "NormalDistribution") [] [
+      makeUncertMLNamedShow "mean" mean,
+      makeUncertMLNamedShow "variance" var
+    ]
+uncertmlASTToXML (BinomialDistribution ntrials psuccess) =
+  mkqelem (uelName "BinomialDistribution") [] [
+      makeUncertMLNamedShow "numberOfTrials" ntrials,
+      makeUncertMLNamedShow "probabilityOfSuccess" psuccess
+  ]
+uncertmlASTToXML (MultinomialDistribution ntrials probs) =
+  mkqelem (uelName "MultinomialDistribution") [] [
+      makeUncertMLNamedShow "numberOfTrials" ntrials,
+      makeUncertMLList "probabilities" probs
+    ]
+uncertmlASTToXML (LogNormalDistribution logscale shape) =
+  mkqelem (uelName "LogNormalDistribution") [] [
+      makeUncertMLNamedShow "logScale" logscale,
+      makeUncertMLNamedShow "shape" shape
+  ]
+uncertmlASTToXML (StudentTDistribution loc scal df) =
+  mkqelem (uelName "StudentTDistribution") [] [
+      makeUncertMLNamedShow "location" loc,
+      makeUncertMLNamedShow "scale" scal,
+      makeUncertMLNamedShow "degreesOfFreedom" df
+  ]
+uncertmlASTToXML (UniformDistribution minv maxv) =
+  mkqelem (uelName "UniformDistribution") [] [
+      makeUncertMLNamedShow "minimum" minv,
+      makeUncertMLNamedShow "maximum" maxv
+  ]
+uncertmlASTToXML (MixtureModel l) =
+  mkqelem (uelName "MixtureModel") [] (map (\(w,d) -> mkqelem (uelName "component") [sattr "weight" (show w)] [uncertmlASTToXML d]) l)
+uncertmlASTToXML (MultivariateNormalDistribution mean cov) =
+  mkqelem (uelName "MultivariateNormalDistribution") [] [
+      makeUncertMLNamedShow "mean" mean,
+      mkqelem (uelName "covarianceMatrix")
+        [sattr "dimension" (show . length . head $ cov)]
+        [makeUncertMLList "values" $ concat cov]
+    ]
+uncertmlASTToXML (MultivariateStudentTDistribution mean cov df) =
+  mkqelem (uelName "MultivariateStudentTDistribution") [] [
+      makeUncertMLNamedShow "mean" mean,
+      mkqelem (uelName "covarianceMatrix")
+        [sattr "dimension" (show . length . head $ cov)]
+        [makeUncertMLList "values" $ concat cov],
+      makeUncertMLNamedShow "degreesOfFreedom" df
+    ]
+uncertmlASTToXML (BetaDistribution alpha beta) =
+  mkqelem (uelName "BetaDistribution") [] [
+      makeUncertMLNamedShow "alpha" alpha,
+      makeUncertMLNamedShow "beta" beta
+    ]
+uncertmlASTToXML (LaplaceDistribution loc scal) =
+  mkqelem (uelName "LaplaceDistribution") [] [
+      makeUncertMLNamedShow "location" loc,
+      makeUncertMLNamedShow "scale" scal
+    ]
+uncertmlASTToXML (CauchyDistribution loc scal) =
+  mkqelem (uelName "CauchyDistribution") [] [
+      makeUncertMLNamedShow "location" loc,
+      makeUncertMLNamedShow "scale" scal
+    ]
+uncertmlASTToXML (WeibullDistribution scal shape) =
+  mkqelem (uelName "WeibullDistribution") [] [
+      makeUncertMLNamedShow "scale" scal,
+      makeUncertMLNamedShow "shape" shape
+    ]
+uncertmlASTToXML (LogisticDistribution loc scal) =
+  mkqelem (uelName "LogisticDistribution") [] [
+      makeUncertMLNamedShow "location" loc,
+      makeUncertMLNamedShow "scale" scal
+    ]
+uncertmlASTToXML (ChiSquareDistribution df) =
+  mkqelem (uelName "ChiSquareDistribution") [] [
+      makeUncertMLNamedShow "degreesOfFreedom" df
+    ]
+uncertmlASTToXML (GeometricDistribution prob) =
+  mkqelem (uelName "GeometricDistribution") [] [
+      makeUncertMLNamedShow "probability" prob
+    ]
+uncertmlASTToXML (HypergeometricDistribution nsuc ntri npop) =
+  mkqelem (uelName "HypergeometricDistribution") [] [
+      makeUncertMLNamedShow "numberOfSuccesses" nsuc,
+      makeUncertMLNamedShow "numberOfTrials" ntri,
+      makeUncertMLNamedShow "populationSize" npop
+    ]
+uncertmlASTToXML (FDistribution denom num) =
+  mkqelem (uelName "FDistribution") [] [
+      makeUncertMLNamedShow "denominator" denom,
+      makeUncertMLNamedShow "numerator" num
+    ]
+uncertmlASTToXML (NegativeBinomialDistribution numFails prob) =
+  mkqelem (uelName "NegativeBinomialDistribution") [] [
+      makeUncertMLNamedShow "numberOfFailures" numFails,
+      makeUncertMLNamedShow "probability" prob
+    ]
+uncertmlASTToXML (ParetoDistribution scal slope) =
+  mkqelem (uelName "ParetoDistribution") [] [
+      makeUncertMLNamedShow "scale" scal,
+      makeUncertMLNamedShow "slope" slope
+    ]
+uncertmlASTToXML (WishartDistribution df scalMat) =
+  mkqelem (uelName "WishartDistribution") [] [
+      makeUncertMLNamedShow "degreesOfFreedom" df,
+      mkqelem (uelName "scaleMatrix")
+        [sattr "dimension" (show . length . head $ scalMat)]
+        [makeUncertMLList "values" $ concat scalMat]
+    ]
+uncertmlASTToXML (BernoulliDistribution prob) =
+  mkqelem (uelName "BernoulliDistribution") [] [
+      makeUncertMLNamedShow "probabilities" prob
+    ]
