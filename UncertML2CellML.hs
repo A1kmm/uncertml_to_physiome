@@ -90,11 +90,14 @@ unToMMLAST (DirichletDistribution alphafull@(alpha1:(alphatail@(_:_)))) =
            M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity")
              [
                M2Lambda "x" $
-                 M2Apply M2Times
-                   [M2Apply M2Divide [M2Cn "dimensionless" 1, mmlBetaFunc initialAlpha initialBeta],
-                    M2Apply M2Power [x, M2Apply M2Minus [initialAlpha, M2Cn "dimensionless" 1]],
-                    M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, x], M2Apply M2Minus [initialBeta, M2Cn "dimensionless" 1]]
-                   ]
+                 M2Apply M2Divide 
+                 [
+                   M2Apply M2Times
+                     [M2Apply M2Power [x, M2Apply M2Minus [initialAlpha, M2Cn "dimensionless" 1]],
+                      M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, x], M2Apply M2Minus [initialBeta, M2Cn "dimensionless" 1]]
+                     ],
+                   mmlBetaFunc initialAlpha initialBeta
+                 ]
              ]
          ]
       ],
@@ -534,10 +537,10 @@ unToMMLASTPDF x (FDistribution denom num) =
           ]
       ]
 
-unToMMLASTPDF x (ParetoDistribution scale slope) =
+unToMMLASTPDF x (ParetoDistribution scale shape) =
   let
     xm = M2Cn "dimensionless" scale
-    alpha = M2Cn "dimensionless" slope
+    alpha = M2Cn "dimensionless" shape
   in
    M2Piecewise [
      (M2Apply M2Divide

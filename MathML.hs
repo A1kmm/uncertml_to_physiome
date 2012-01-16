@@ -127,10 +127,11 @@ mathml2OpToXML (M2Csymbol cs) = [mkqelem (mkNsName "mml:csymbol" mathmlNS) [satt
 
 mathmlFloat = do
   mathmlWhitespace
+  m <- (char '-' >> return (-1)) <|> (return 1)
   v <- naturalOrFloat haskell
   case v of
-       Left n -> return $ fromIntegral n
-       Right f -> return f
+       Left n -> return $ m * fromIntegral n
+       Right f -> return $ m * f
 mathmlWhitespace = many (oneOf " \t\r\n")
 
 xmlToMathML2 :: ArrowXml a => a XmlTree MathML2Expression
@@ -142,11 +143,11 @@ xmlToMathML2 =
   (hasQName (mkNsName "mml:cn" mathmlNS) >>>
    liftArrow2 M2Cn (getQAttrValue (mkNsName "cellml:units" cellmlNS))
                    (parseCombinedChildText mathmlFloat)) <+>
-  (liftArrow2 M2Lambda (getChildren >>> hasQName (mkNsName "mml:bvar" mathmlNS) 
-                                    /> hasQName (mkNsName "mml:ci" mathmlNS)
-                                    >>> combinedChildText)
+  (hasQName (mkNsName "mml:lambda" mathmlNS) >>> liftArrow2 M2Lambda (getChildren >>> hasQName (mkNsName "mml:bvar" mathmlNS) 
+                                                                      /> hasQName (mkNsName "mml:ci" mathmlNS)
+                                                                      >>> combinedChildText)
                        (getChildren >>> xmlToMathML2)) <+>
-  (liftArrow M2Vector (listA $ getChildren >>> xmlToMathML2)) <+>
+  (hasQName (mkNsName "mml:vector" mathmlNS) >>> liftArrow M2Vector (listA $ getChildren >>> xmlToMathML2)) <+>
   xml2M2Constant "true" M2True <+>
   xml2M2Constant "false" M2False <+>
   xml2M2Constant "infinity" M2Infinity <+>
@@ -161,7 +162,7 @@ xmlToMathML2 =
       (maybeA $ getChildren >>> hasQName (mkNsName "mml:otherwise" mathmlNS) />
                 xmlToMathML2))
 
-xml2M2Constant n c = ((getChildren >>> hasQName (mkNsName ("mml:" ++ n) mathmlNS)) `guards` (arr $ const c))
+xml2M2Constant n c = ((hasQName (mkNsName ("mml:" ++ n) mathmlNS)) `guards` (arr $ const c))
 
 xmlToM2Op = m2SimpleOp "quotient" M2Quotient <+>
             m2SimpleOp "factorial" M2Factorial <+>
@@ -206,7 +207,8 @@ xmlToM2Op = m2SimpleOp "quotient" M2Quotient <+>
             ((getChildren >>> hasQName (mkNsName "mml:log" mathmlNS)) `guards`
               (liftArrow M2Log
                  (m2MaybeExpression "logbase")
-              ))
+              )) <+>
+            (getChildren >>> hasQName (mkNsName "mml:csymbol" mathmlNS) >>> liftArrow M2Csymbol (getAttrValue "definitionURL"))
 
 m2MaybeExpression n = (maybeA (getChildren >>> hasQName (mkNsName ("mml:" ++ n) mathmlNS) /> xmlToMathML2))
 m2SimpleOp n c = getChildren >>> (hasQName (mkNsName ("mml:" ++ n) mathmlNS) >>^ const c)

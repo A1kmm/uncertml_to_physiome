@@ -5,17 +5,16 @@ import Control.Monad
 import Text.XML.HXT.Arrow.ParserInterface
 import Data.Maybe
 import ParsingSupport
-import Debug.Trace
 
 main = do
-  liftM doConversion getContents >>= putStr
+  liftM doConversion getContents >>= putStrLn
 
 doConversion :: String -> String
-doConversion = concat . runLA (xshow $ (\v -> (v, v)) ^>> parseXmlDoc >>> propagateNamespaces >>> hasQName (mkNsName "mml:math" mathmlNS) /> xmlToMathML2 >>> arrMaybe mmlToUnAST >>> unToXML)
+doConversion = concat . runLA (xshow $ ((\v -> (v, v)) ^>> parseXmlDoc >>> propagateNamespaces >>> hasQName (mkNsName "mml:math" mathmlNS) /> xmlToMathML2 >>^ (\v -> {- Debug.Trace.trace (show v) -} v)) >>> arrMaybe mmlToUnAST >>> unToXML >>> addAttr "xmlns:un" uncertmlNS)
 
 mmlToUnAST (M2Apply M2Eq [l, M2Apply (M2Csymbol upd) [d]])
   | upd == "http://www.cellml.org/uncertainty-1#uncertainParameterWithDistribution" =
-    Debug.Trace.trace (show d) $! mmlDistToUnAST d
+    mmlDistToUnAST d
 mmlToUnAST _ = Nothing
 
 mmlDistToUnAST (M2Apply (M2Csymbol dtype) [v])
@@ -40,6 +39,12 @@ mmlRealisationsToUnAST (M2Vector l) =
 mmlRealisationsToUnAST _ = Nothing
 
 mmlMassToUnAST (M2Lambda k v) = mmlMassFToUnAST k v
+
+mmlMassFToUnAST k (M2Piecewise [(p, M2Apply M2Eq [M2Ci k1, M2Cn _ one1]),
+                                (M2Apply M2Minus [M2Cn _ one2, p2], M2Apply M2Eq [M2Ci k2, M2Cn _ one3])]
+                   (Just (M2Cn _ zero1)))
+  | zero1 == 0 && one1 == 1 && one2 == 1 && one3 == 1 && k == k1 && k == k2 && p2 == p =
+     liftM BernoulliDistribution (m2TryEval p)
 
 mmlMassFToUnAST k (M2Apply M2Times [M2Apply M2Divide [M2Apply M2Power [lambda, M2Ci k1], M2Apply M2Factorial [M2Ci k2]],
                                     M2Apply M2Exp [M2Apply M2Minus [lambda2]]])
@@ -87,7 +92,24 @@ mmlMassFToUnAST k (M2Apply M2Times [
   | k1 == k && k2 == k && k3 == k && k4 == k && n == n1 && n == n2 && p == p1 =
     liftM2 BinomialDistribution (liftM floor $ m2TryEval n) (m2TryEval p)
 
-mmlDensityToUnAST (M2Lambda x v) = mmlDensityFToUnAST x v
+mmlMassFToUnAST k (M2Apply M2Times
+                     [
+                       M2Apply M2Divide
+                         [
+                           M2Apply M2Factorial [M2Apply M2Minus [M2Apply M2Plus [M2Ci k1, r], M2Cn _ one1]],
+                           M2Apply M2Times [M2Apply M2Factorial [M2Ci k2],
+                                            M2Apply M2Factorial [M2Apply M2Minus [M2Apply M2Minus [M2Apply M2Plus [M2Ci k3, r1], M2Cn _ one2], M2Ci k4]]]
+                         ],
+                       M2Apply M2Power [M2Apply M2Minus [M2Cn _ one3, p], r2],
+                       M2Apply M2Power [p1, M2Ci k5]
+                     ]
+                  )
+  | one1 == 1 && one2 == 1 && one3 == 1 && k1 == k && k2 == k && k3 == k && k4 == k && k5 == k && r1 == r && r2 == r && p1 == p =
+    liftM2 NegativeBinomialDistribution (liftM floor $ m2TryEval r) (m2TryEval p)
+
+mmlMassFToUnAST _ _ = Nothing
+
+mmlDensityToUnAST (M2Lambda x v) = {- Debug.Trace.trace (show (x, v)) $ -} mmlDensityFToUnAST x v
 mmlDensityToUnAST _ = Nothing
 
 mmlDensityFToUnAST x (M2Piecewise [(M2Cn _ zero1, M2Apply M2Lt [M2Ci x1, M2Cn _ zero2])]
@@ -97,10 +119,10 @@ mmlDensityFToUnAST x (M2Piecewise [(M2Cn _ zero1, M2Apply M2Lt [M2Ci x1, M2Cn _ 
   | zero1 == 0 && zero2 == 0 && x1 == x && x2 == x && exprate == exprate1 =
     liftM ExponentialDistribution (m2TryEval exprate)
 
-mmlDensityFToUnAST x (M2Apply M2Times [M2Apply M2Power [M2Ci x1, M2Apply M2Minus [M2Apply M2Minus [shape, M2Cn _ zero1]]],
+mmlDensityFToUnAST x (M2Apply M2Times [M2Apply M2Power [M2Ci x1, M2Apply M2Minus [M2Apply M2Minus [shape, M2Cn _ one1]]],
                                        M2Apply M2Divide [M2Apply M2Exp [M2Apply M2Minus [M2Apply M2Divide [M2Ci x2, scale]]],
                                                          M2Apply M2Times [M2Apply M2Power [scale1, shape1], gamma]]])
-  | zero1 == 0 && x1 == x && shape == shape1 && scale == scale1 && isGammaFunc shape gamma =
+  | one1 == 1 && x1 == x && shape == shape1 && scale == scale1 && isGammaFunc shape gamma =
     liftM2 GammaDistribution (m2TryEval shape) (m2TryEval scale)
 
 mmlDensityFToUnAST x (M2Apply M2Times [M2Apply M2Divide [M2Apply M2Power [beta, alpha], gamma],
@@ -295,13 +317,12 @@ mmlDensityFToUnAST x (M2Apply M2Divide [
       liftM2 FDistribution (m2TryEval denom) (m2TryEval num)
 
 mmlDensityFToUnAST x (M2Piecewise [(M2Apply M2Divide
-                                    [ M2Apply M2Times [ slope, M2Apply M2Power [scale, slope1] ],
-                                      M2Apply M2Power [ M2Ci x1, M2Apply M2Plus [ slope2, M2Cn _ one1 ]]
+                                    [ M2Apply M2Times [ shape, M2Apply M2Power [scale, shape1] ],
+                                      M2Apply M2Power [ M2Ci x1, M2Apply M2Plus [ shape2, M2Cn _ one1 ]]
                                     ],
                                     M2Apply M2Geq [M2Ci x2, scale1])] (Just (M2Cn _ zero1)))
-  | zero1 == 0 && one1 == 1 && scale1 == scale && slope1 == slope && slope2 == slope && x1 == x && x2 == x =
-    liftM2 ParetoDistribution (m2TryEval scale) (m2TryEval slope)
-
+  | zero1 == 0 && one1 == 1 && scale1 == scale && shape1 == shape && shape2 == shape && x1 == x && x2 == x =
+    liftM2 ParetoDistribution (m2TryEval scale) (m2TryEval shape)
 
 mmlDensityFToUnAST _ _ = Nothing
 

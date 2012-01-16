@@ -1,6 +1,6 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 module UncertML (UncertMLDistribution(..), xmlToUncertMLDistribution,
-                 uncertmlASTToXML, unToXML)
+                 uncertmlASTToXML, unToXML, uncertmlNS)
 where
 
 import Control.Monad
@@ -58,7 +58,7 @@ data UncertMLDistribution =
                                hypergeoPopSize :: Int } |
   FDistribution { fdistDenominator :: Double, fdistNumerator :: Double } |
   NegativeBinomialDistribution { negbinNumFailures :: Int, negbinProb :: Double } |
-  ParetoDistribution { paretoScale :: Double, paretoSlope :: Double } |
+  ParetoDistribution { paretoScale :: Double, paretoShape :: Double } |
   WishartDistribution { wishartDegF :: Double, wishartScale :: [[Double]] } |
   BernoulliDistribution { bernoulliProb :: Double } deriving(Eq, Ord, Show)
 
@@ -66,10 +66,11 @@ uncertmlNS = "http://www.uncertml.org/2.0"
 
 uncertmlFloat = do
   uncertmlWhitespace
+  m <- (char '-' >> return (-1)) <|> (return 1)
   v <- naturalOrFloat haskell
   case v of
-       Left n -> return $ fromIntegral n
-       Right f -> return f
+       Left n -> return $ m * fromIntegral n
+       Right f -> return $ m * f
 
 uncertmlWhitespace = many (oneOf " \t\r\n")
 uncertmlList a = sepBy a uncertmlWhitespace
@@ -197,7 +198,7 @@ xmlToUncertMLDistribution =
   (hasQName (uelName "ParetoDistribution") >>>
    liftArrow2 ParetoDistribution
      (getChildren >>> hasQName (uelName "scale") >>> readCombinedChildText)
-     (getChildren >>> hasQName (uelName "slope") >>> readCombinedChildText)
+     (getChildren >>> hasQName (uelName "shape") >>> readCombinedChildText)
   ) <+>
   (hasQName (uelName "WishartDistribution") >>>
    liftArrow2 WishartDistribution
@@ -349,10 +350,10 @@ uncertmlASTToXML (NegativeBinomialDistribution numFails prob) =
       makeUncertMLNamedShow "numberOfFailures" numFails,
       makeUncertMLNamedShow "probability" prob
     ]
-uncertmlASTToXML (ParetoDistribution scal slope) =
+uncertmlASTToXML (ParetoDistribution scal shape) =
   mkqelem (uelName "ParetoDistribution") [] [
       makeUncertMLNamedShow "scale" scal,
-      makeUncertMLNamedShow "slope" slope
+      makeUncertMLNamedShow "shape" shape
     ]
 uncertmlASTToXML (WishartDistribution df scalMat) =
   mkqelem (uelName "WishartDistribution") [] [
