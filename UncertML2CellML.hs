@@ -62,11 +62,14 @@ unToMMLAST (DirichletDistribution alphafull@(alpha1:(alphatail@(_:_)))) =
                                 M2Apply (M2Csymbol "http://www.cellml.org/uncertainty-1#distributionFromDensity")
                                   [
                                     M2Lambda "x" $
-                                      M2Apply M2Times
-                                        [M2Apply M2Divide [M2Cn "dimensionless" 1, mmlBetaFunc a b],
-                                         M2Apply M2Power [x, M2Apply M2Minus [a, M2Cn "dimensionless" 1]],
-                                         M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, x], M2Apply M2Minus [b, M2Cn "dimensionless" 1]]
-                                        ]
+                                      M2Apply M2Divide [
+                                                        M2Apply M2Times [
+                                                          M2Apply M2Power [x, M2Apply M2Minus [a, M2Cn "dimensionless" 1]],
+                                                          M2Apply M2Power [M2Apply M2Minus [M2Cn "dimensionless" 1, x],
+                                                                           M2Apply M2Minus [b, M2Cn "dimensionless" 1]]
+                                                        ],
+                                                        mmlBetaFunc a b
+                                                       ]
                                   ]
                               ]
                            ]
@@ -336,34 +339,41 @@ unToMMLASTPDF x (StudentTDistribution loc scale degf) =
     t = M2Apply M2Divide [M2Apply M2Minus [x, M2Cn "dimensionless" loc],
                           M2Cn "dimensionless" scale]
     nu = M2Cn "dimensionless" (fromIntegral degf)
+    locex = M2Cn "dimensionless" loc
+    scaleex = M2Cn "dimensionless" scale
     nuP1Half = M2Apply M2Divide [M2Apply M2Plus [nu, M2Cn "dimensionless" 1],
                                  M2Cn "dimensionless" 2]
   in
-   M2Apply M2Times [
-     M2Apply M2Divide [
-        mmlGammaFunc nuP1Half,
+   M2Apply M2Divide [
+     M2Apply M2Plus [
         M2Apply M2Times [
-            M2Apply (M2Root Nothing) [
-               M2Apply M2Times [nu, M2Pi]
-                           ],
-            mmlGammaFunc (M2Apply M2Divide [nu, M2Cn "dimensionless" 2])
-          ]
-      ],
-     M2Apply M2Power [
-         M2Apply M2Plus [
-            M2Cn "dimensionless" 1,
+          M2Apply M2Divide [
+             mmlGammaFunc nuP1Half,
+             M2Apply M2Times [
+               M2Apply (M2Root Nothing) [
+                  M2Apply M2Times [nu, M2Pi]
+                  ],
+               mmlGammaFunc (M2Apply M2Divide [nu, M2Cn "dimensionless" 2])
+               ]
+             ],
+          M2Apply M2Power [
+            M2Apply M2Plus [
+               M2Cn "dimensionless" 1,
+               M2Apply M2Divide [
+                 M2Apply M2Power [x, M2Cn "dimensionless" 2],
+                 nu
+                 ]
+               ]
+            ],
+          M2Apply M2Minus [
             M2Apply M2Divide [
-                M2Apply M2Power [x, M2Cn "dimensionless" 2],
-                nu
-              ]
-           ]
-       ],
-       M2Apply M2Minus [
-           M2Apply M2Divide [
-              M2Apply M2Plus [nu, M2Cn "dimensionless" 1],
-              M2Cn "dimensionless" 2
+               M2Apply M2Plus [nu, M2Cn "dimensionless" 1],
+               M2Cn "dimensionless" 2
+               ]
             ]
-         ]
+          ],
+        locex
+        ], scaleex
      ]
 
 unToMMLASTPDF x (UniformDistribution min max) =
@@ -377,7 +387,7 @@ unToMMLASTPDF x (UniformDistribution min max) =
 
 unToMMLASTPDF x (MixtureModel components) =
   M2Apply M2Plus $ flip map components $ \(weight, component) -> 
-    M2Apply M2Times [M2Cn "dimensionless" weight, unToMMLExprAST component]
+    M2Apply M2Times [M2Cn "dimensionless" weight, unToMMLASTPDF x component]
 
 unToMMLASTPDF x (MultivariateNormalDistribution mean cov) = error "Multivariate normal distribution cannot currently be used in a mixture model"
 
